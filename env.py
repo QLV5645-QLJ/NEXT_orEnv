@@ -7,6 +7,7 @@ if not __openravepy_build_doc__:
     from numpy import *
 from openrave_utils.funcs import *
 import os
+from openrave_utils.or_planner import ORPLANNER
 
 def waitrobot(robot):
     """busy wait for robot completion"""
@@ -25,66 +26,36 @@ def main(env,options):
     manipulator = robot.GetManipulator('arm')
     robot.SetActiveManipulator(manipulator)
 
-    #get current state
-    # print robot.GetDOFValues(manipulator.GetArmIndices())   
-    # print("before start:",env.CheckCollision(robot))
-
-    #find available solution
+    #find available solution and execute solution
     start_config = generate_goalIk(right=True,robot=robot)
-
-    #execute solution
-    # execute_dofValues(solution=start_config,robot=robot,env=env)
     execute_activeDOFValues(solution=start_config,robot=robot,env=env)   
-    # print current_dofValues(robot)
-    time.sleep(3)
-
-    #check collision
-    # print("after start:",env.CheckCollision(robot))    
+    time.sleep(0.1)
     
     #find available solution
     goal_config = generate_goalIk(right=False,robot=robot)
-    
-    #execute solution
-    # execute_dofValues(solution=goal_config,robot=robot,env=env)
-    # execute_activeDOFValues(solution=goal_config,robot=robot,env=env)
-    # print current_dofValues(robot)      
-    # time.sleep(10)
 
-    planner_name = "OMPL_RRTstar"
-    planner = RaveCreatePlanner(env, planner_name)
-    simplifier = RaveCreatePlanner(env, 'OMPL_Simplifier')
+    #use palner to plan path
+    orplanner = ORPLANNER(robot=robot,env=env,planner_name = "OMPL_RRTstar")
 
-    params = Planner.PlannerParameters()
-    params.SetRobotActiveJoints(robot)
-    params.SetGoalConfig(goal_config)
+    goal_num = 100
+    success_num = 0
+    for i in range(goal_num):
+        goal_config = generate_goalIk(right=bool(i%2),robot=robot)
+        orplanner.set_goal(goal_config)
+        traj = orplanner.plan_traj()
 
-    param_string_old = """<_postprocessing planner="parabolicsmoother">
-    <_nmaxiterations>100</_nmaxiterations>
-    </_postprocessing>"""
-    params.SetExtraParameters(param_string_old)
+        if(traj is None):
+            print("no solution")
+            continue
 
-    with env:
-        with robot:
-            # Invoke the planner.
-            print 'Calling the %s planner.'%planner_name
-            traj = RaveCreateTrajectory(env, '')
-            planner.InitPlan(robot, params)
-            result = planner.PlanPath(traj)
-            assert result == PlannerStatus.HasSolution
-            getData_trajectory(traj)
-
-            # Time the trajectory.
-            print 'Timing trajectory'
-            result = planningutils.RetimeTrajectory(traj)
-            assert result == PlannerStatus.HasSolution
-            getData_trajectory(traj)
-
-    # Execute the trajectory.
-    raw_input('Press <ENTER> to execute trajectory.')
-    robot.GetController().SetPath(traj)
-    robot.WaitForController(0)
-    time.sleep(2)
-
+        # Execute the trajectory.
+        robot.GetController().SetPath(traj)
+        robot.WaitForController(0)
+        time.sleep(2)
+        success_num+=1
+    print("path num:",goal_num)
+    print("sucess time:".success_num)
+    print("success rate:",success_num/goal_num)
 
 
 
