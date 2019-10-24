@@ -82,7 +82,7 @@ def generate_goalIk_exp1(right=True,robot=None,pos=None):
 
     for i in range(1000):
         #box position 3.5 -1.3 0.74
-        goal[0,3] = pos[0] + random.uniform(-0.3,0.3)#Thand[0,3] + random.rand(1)/10
+        goal[0,3] = pos[0] + random.uniform(-0.2,0.2)#(-0.3,0.3)#Thand[0,3] + random.rand(1)/10
         goal[1,3] = pos[1] + random.uniform(-0.2,0.2)#Thand[1,3] + random.rand(1)/10
         goal[2,3] = pos[2] + random.uniform(-0.3,0.3)#Thand[2,3] + random.rand(1)/10
         solution = robot.GetActiveManipulator().FindIKSolution(goal,True)
