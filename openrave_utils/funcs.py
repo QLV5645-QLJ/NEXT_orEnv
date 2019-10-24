@@ -19,6 +19,7 @@ def generate_goalIk(right=True,robot=None):
     goal = eye(4,dtype=float)
     board_pos = [3.5,0.0,1.0]
     delta_y = 0
+    solution = None
     if(right):
         board_pos[1] = -1.2
         delta_y = 1 
@@ -64,5 +65,28 @@ def getData_trajectory(traj):
         stepLength = sqrt(sum((traj_array[i+1,]-traj_array[i,])**2))
         # print("step%d delta:"%i,(traj_array[i+1,]-traj_array[i,]))
         # print("step%d length: %f"%(i,stepLength))
-    print("num:",num)
+    print("trajectory num:",num)
     # print("duration",duration)
+
+def generate_goalIk_exp1(right=True,robot=None,pos=None):
+    """
+    generate ik solution of the right of the board
+    """
+    goal = eye(4,dtype=float)
+    delta_y = 0
+    solution = None
+    if(right):
+        delta_y = 1 
+    else:
+        delta_y = -1 
+
+    for i in range(1000):
+        #box position 3.5 -1.3 0.74
+        goal[0,3] = pos[0] + random.uniform(-0.3,0.3)#Thand[0,3] + random.rand(1)/10
+        goal[1,3] = pos[1] + random.uniform(-0.2,0.2)#Thand[1,3] + random.rand(1)/10
+        goal[2,3] = pos[2] + random.uniform(-0.3,0.3)#Thand[2,3] + random.rand(1)/10
+        solution = robot.GetActiveManipulator().FindIKSolution(goal,True)
+        if(solution is not None):
+            break
+    # print("goal:",goal[0:3,3])
+    return solution

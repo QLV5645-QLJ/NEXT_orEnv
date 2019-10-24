@@ -8,7 +8,7 @@ if not __openravepy_build_doc__:
 from openrave_utils.funcs import *
 import os
 from openrave_utils.or_planner import ORPLANNER
-
+import time
 def waitrobot(robot):
     """busy wait for robot completion"""
     while not robot.GetController().IsDone():
@@ -17,7 +17,7 @@ def waitrobot(robot):
 def main(env,options):
     "Main example code."
     # load a scene from ProjectRoom environment XML file
-    env.Load(os.getcwd()+'/worlds/exp0.env.xml')
+    env.Load(os.getcwd()+'/worlds/exp1.env.xml')
     print(env.GetCollisionChecker())
     time.sleep(1)
 
@@ -27,36 +27,58 @@ def main(env,options):
     robot.SetActiveManipulator(manipulator)
 
     #find available solution and execute solution
-    start_config = generate_goalIk(right=True,robot=robot)
+    start_config = generate_goalIk_exp1(right=True,robot=robot,pos=[3.5,-1.2,1.0])
+    # start_config = generate_goalIk(right=True,robot=robot)
+    if(start_config is None):
+        print("initialize robot arm eith failure")
+        exit()
     execute_activeDOFValues(solution=start_config,robot=robot,env=env)   
     time.sleep(0.1)
     
-    #find available solution
-    goal_config = generate_goalIk(right=False,robot=robot)
 
     #use palner to plan path
-    orplanner = ORPLANNER(robot=robot,env=env,planner_name = "OMPL_RRTstar")
-
+    orplanner = ORPLANNER(robot=robot,env=env,planner_name = "OMPL_BITstar")
     goal_num = 100
     success_num = 0
+    inside = True
+    delta_time = 0.0
     for i in range(goal_num):
-        goal_config = generate_goalIk(right=bool(i%2),robot=robot)
-        orplanner.set_goal(goal_config)
-        traj = orplanner.plan_traj()
+        print("path num:",i+1)
+        print("sucess num:",success_num)
+        print("total plan time:",delta_time)
 
+        #generate goal
+        goal_config = None
+        if(inside):
+            # goal_config = generate_goalIk(right=not inside,robot=robot)
+            goal_config = generate_goalIk_exp1(right=True,robot=robot,pos=[3.5,-1.7,1.0])
+        else:
+            # goal_config = generate_goalIk(right=not inside,robot=robot)
+            goal_config = generate_goalIk_exp1(right=True,robot=robot,pos=[3.5,-1.2,1.0])
+
+        #generate trajectory
+        if(goal_config is None):
+            print("No goal IK solution")
+            continue
+        orplanner.set_goal(goal_config)
+        start_time = time.time()
+        traj = orplanner.plan_traj()
+        end_time = time.time()
         if(traj is None):
-            print("no solution")
+            print("no trajectory solution")
             continue
 
         # Execute the trajectory.
         robot.GetController().SetPath(traj)
         robot.WaitForController(0)
-        time.sleep(2)
-        success_num+=1
-    print("path num:",goal_num)
-    print("sucess time:".success_num)
-    print("success rate:",success_num/goal_num)
+        time.sleep(0.5)
 
+        success_num+=1
+        delta_time += (end_time-start_time)
+        inside = not inside      
+    # print("path num:",goal_num)
+    # print("sucess time:",success_num)
+    # print("total time:",delta_time)
 
 
 
