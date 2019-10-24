@@ -6,6 +6,7 @@ if not __openravepy_build_doc__:
     from openravepy import *
     from numpy import *
 from openrave_utils.funcs import *
+import os
 
 def waitrobot(robot):
     """busy wait for robot completion"""
@@ -15,7 +16,7 @@ def waitrobot(robot):
 def main(env,options):
     "Main example code."
     # load a scene from ProjectRoom environment XML file
-    env.Load('/root/catkin_ws/NEXT_ws/simulation/worlds/exp0.env.xml')
+    env.Load(os.getcwd()+'/worlds/exp0.env.xml')
     print(env.GetCollisionChecker())
     time.sleep(1)
 
