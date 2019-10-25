@@ -37,7 +37,7 @@ def main(env,options):
     
 
     #use palner to plan path
-    orplanner = ORPLANNER(robot=robot,env=env,planner_name = "OMPL_BITstar")
+    orplanner = ORPLANNER(robot=robot,env=env,planner_name = "OMPL_RRTstar")
     goal_num = 100
     success_num = 0
     inside = True

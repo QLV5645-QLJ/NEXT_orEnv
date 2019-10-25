@@ -22,10 +22,11 @@ class ORPLANNER():
 	def set_goal(self,goal_config):
 		self.params.SetRobotActiveJoints(self.robot)
 		# self.params.SetGoalConfig(goal_config)
-		param_string = """<_postprocessing planner="parabolicsmoother">
-		<_nmaxiterations>100</_nmaxiterations>
-		</_postprocessing>"""
-		self.params.SetExtraParameters(param_string)
+		self.params.SetExtraParameters('<time_limit>100</time_limit><range>0.02</range>')#50,0.02
+        # param_string = """<_postprocessing planner="parabolicsmoother">
+        # <_nmaxiterations>100</_nmaxiterations></_postprocessing>"""
+		# self.params.SetExtraParameters(param_string)
+		# self.params.SetExtraParameters('<range>0.02</range>')
 		self.params.SetGoalConfig(goal_config)
 
 
@@ -39,7 +40,7 @@ class ORPLANNER():
 				result = self.planner.PlanPath(traj)
 				if result != PlannerStatus.HasSolution:
 					return None
-				# getData_trajectory(traj)
+				getData_trajectory(traj)
 
 				# Shortcut the path.
 				print 'Calling the OMPL_Simplifier for shortcutting.'
