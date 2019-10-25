@@ -9,12 +9,14 @@ from openrave_utils.funcs import *
 import os
 
 class ORPLANNER():
-	def __init__(self,env,robot,planner_name):
+	def __init__(self,env,robot,planner_name,time_limit=10.0,motion_range=0.2):
 		self.env = env
 		self.robot = robot
 		self.planner_name = planner_name#"OMPL_RRTstar"
 		self.planner = RaveCreatePlanner(env, planner_name)
 		self.simplifier = RaveCreatePlanner(env, 'OMPL_Simplifier')
+		self.time_limit = time_limit
+		self.motion_range = motion_range
 
 		self.params = Planner.PlannerParameters()
 
@@ -22,11 +24,15 @@ class ORPLANNER():
 	def set_goal(self,goal_config):
 		self.params.SetRobotActiveJoints(self.robot)
 		# self.params.SetGoalConfig(goal_config)
-		self.params.SetExtraParameters('<time_limit>100</time_limit><range>0.02</range>')#50,0.02
-        # param_string = """<_postprocessing planner="parabolicsmoother">
-        # <_nmaxiterations>100</_nmaxiterations></_postprocessing>"""
-		# self.params.SetExtraParameters(param_string)
-		# self.params.SetExtraParameters('<range>0.02</range>')
+		# self.params.SetExtraParameters('<time_limit>100</time_limit>')#50,0.02
+        # param_string = """<time_limit>100</time_limit>
+	       #  <_postprocessing planner="parabolicsmoother">
+    	   #  <_nmaxiterations>100</_nmaxiterations></_postprocessing>"""
+		self.params.SetExtraParameters("""<time_limit>%s</time_limit>
+			<range>%s</range>"""%(str(self.time_limit),str(self.motion_range)))
+	        # <_postprocessing planner="parabolicsmoother">
+    	    # <_nmaxiterations>5000</_nmaxiterations></_postprocessing>""")
+		# self.params.SetExtraParameters('<range>0.1</range>')
 		self.params.SetGoalConfig(goal_config)
 
 
@@ -41,6 +47,8 @@ class ORPLANNER():
 				if result != PlannerStatus.HasSolution:
 					return None
 				getData_trajectory(traj)
+				# print self.planner.SendCommand('GetParameters')
+
 
 				# Shortcut the path.
 				print 'Calling the OMPL_Simplifier for shortcutting.'

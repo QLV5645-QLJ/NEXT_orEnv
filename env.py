@@ -26,8 +26,8 @@ def main(env,options):
     manipulator = robot.GetManipulator('arm')
     robot.SetActiveManipulator(manipulator)
 
-    #find available solution and execute solution
-    start_config = generate_goalIk_exp1(right=True,robot=robot,pos=[3.5,-1.2,1.0])
+    #find available solution and execute solution 3.5,-1.2,1.0
+    start_config = generate_goalIk_exp1(right=True,robot=robot,pos=[3.4,-1.2,1.0])
     # start_config = generate_goalIk(right=True,robot=robot)
     if(start_config is None):
         print("initialize robot arm eith failure")
@@ -37,24 +37,28 @@ def main(env,options):
     
 
     #use palner to plan path
-    orplanner = ORPLANNER(robot=robot,env=env,planner_name = "OMPL_RRTstar")
+    time_limit = 40.0
+    motion_range = 20
+    orplanner = ORPLANNER(robot=robot,env=env,planner_name = "OMPL_RRTstar",
+        time_limit = time_limit, motion_range = motion_range)
     goal_num = 100
     success_num = 0
     inside = True
     delta_time = 0.0
     for i in range(goal_num):
-        print("path num:",i+1)
+        print("time_limit: %f motion_range: %f"%(time_limit,motion_range))
+        print("path num:",i)
         print("sucess num:",success_num)
         print("total plan time:",delta_time)
 
         #generate goal
         goal_config = None
         if(inside):
-            # goal_config = generate_goalIk(right=not inside,robot=robot)
-            goal_config = generate_goalIk_exp1(right=True,robot=robot,pos=[3.5,-1.7,1.0])
+            # goal_config = generate_goalIk(right=not inside,robot=robot)3.5,-1.7,1.0
+            goal_config = generate_goalIk_exp1(right=True,robot=robot,pos=[3.4,-1.7,1.0])
         else:
-            # goal_config = generate_goalIk(right=not inside,robot=robot)
-            goal_config = generate_goalIk_exp1(right=True,robot=robot,pos=[3.5,-1.2,1.0])
+            # goal_config = generate_goalIk(right=not inside,robot=robot)3.5,-1.2,1.0
+            goal_config = generate_goalIk_exp1(right=True,robot=robot,pos=[3.4,-1.2,1.0])
 
         #generate trajectory
         if(goal_config is None):
