@@ -37,16 +37,17 @@ def main(env,options):
     
 
     #use palner to plan path
-    time_limit = 40.0
-    motion_range = 20
-    orplanner = ORPLANNER(robot=robot,env=env,planner_name = "OMPL_RRTstar",
-        time_limit = time_limit, motion_range = motion_range)
+    time_limit = 90.0
+    motion_range = 20.0
+    sample_per_batch = 10000.0
+    orplanner = ORPLANNER(robot=robot,env=env,planner_name = "OMPL_BITstar",
+        time_limit = time_limit, motion_range = motion_range,samples_per_batch=sample_per_batch)
     goal_num = 100
     success_num = 0
     inside = True
     delta_time = 0.0
     for i in range(goal_num):
-        print("time_limit: %f motion_range: %f"%(time_limit,motion_range))
+        print("time_limit: %f motion_range:%f sample_per_batch:%f "%(time_limit,motion_range,sample_per_batch))
         print("path num:",i)
         print("sucess num:",success_num)
         print("total plan time:",delta_time)
