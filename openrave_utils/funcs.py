@@ -62,9 +62,10 @@ def getData_trajectory(traj):
     traj_array = asarray(traj_array)
     print(traj_array.shape) #6,15
     for i in range(num-1):
-        stepLength = sqrt(sum((traj_array[i+1,]-traj_array[i,])**2))
+        # stepLength = sqrt(sum((traj_array[i+1,]-traj_array[i,])**2))
+        stepLength = sum(abs(traj_array[i+1,]-traj_array[i,]))
         # print("step%d delta:"%i,(traj_array[i+1,]-traj_array[i,]))
-        # print("step%d length: %f"%(i,stepLength))
+        print("step%d length: %f"%(i,stepLength))
     print("trajectory num:",num)
     # print("duration",duration)
 

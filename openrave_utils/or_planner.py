@@ -49,7 +49,7 @@ class ORPLANNER():
 				print self.planner.SendCommand('GetParameters')
 				if result != PlannerStatus.HasSolution:
 					return None
-				getData_trajectory(traj)
+				# getData_trajectory(traj)
 
 
 				# Shortcut the path.
@@ -59,11 +59,12 @@ class ORPLANNER():
 				# assert result == PlannerStatus.HasSolution
 				if result != PlannerStatus.HasSolution:
 					return None
-				# getData_trajectory(traj)
+				getData_trajectory(traj)
 
 				# Time the trajectory.
 				print 'Timing trajectory'
-				result = planningutils.RetimeTrajectory(traj)
+				result = planningutils.SmoothActiveDOFTrajectory(traj,self.robot)
+				# result = planningutils.RetimeTrajectory(traj)
 				# assert result == PlannerStatus.HasSolution
 				if result != PlannerStatus.HasSolution:
 					return None
