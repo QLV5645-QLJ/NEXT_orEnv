@@ -46,20 +46,21 @@ class ORPLANNER():
 				traj = RaveCreateTrajectory(self.env, '')
 				self.planner.InitPlan(self.robot, self.params)
 				result = self.planner.PlanPath(traj)
-				print self.planner.SendCommand('GetParameters')
+				# print self.planner.SendCommand('GetParameters')
 				if result != PlannerStatus.HasSolution:
-					return None
-				# getData_trajectory(traj)
+					return None,None
+				traj_array = getData_trajectory(traj)
 
-
+				print "calling the iterpolator"
+				final_waypoints = self.interpolate_traj(traj_array,traj)
 				# Shortcut the path.
-				print 'Calling the OMPL_Simplifier for shortcutting.'
-				self.simplifier.InitPlan(self.robot, Planner.PlannerParameters())
-				result = self.simplifier.PlanPath(traj)
-				# assert result == PlannerStatus.HasSolution
-				if result != PlannerStatus.HasSolution:
-					return None
-				getData_trajectory(traj)
+				# print 'Calling the OMPL_Simplifier for shortcutting.'
+				# self.simplifier.InitPlan(self.robot, Planner.PlannerParameters())
+				# result = self.simplifier.PlanPath(traj)
+				# # assert result == PlannerStatus.HasSolution
+				# if result != PlannerStatus.HasSolution:
+				# 	return None
+				# getData_trajectory(traj)
 
 				# Time the trajectory.
 				print 'Timing trajectory'
@@ -67,7 +68,60 @@ class ORPLANNER():
 				# result = planningutils.RetimeTrajectory(traj)
 				# assert result == PlannerStatus.HasSolution
 				if result != PlannerStatus.HasSolution:
-					return None
+					return None,None
 				getData_trajectory(traj)
-				return traj
+				return traj,final_waypoints
 
+	def interpolate_traj(self,raw_traj_array,interpolated_traj):
+		"""Return list of arrays
+
+			Args:
+				raw_traj_array: list of arrays
+			Return:
+				interpolated_traj: rave traj instance
+		"""		
+		# raw_traj_array = 
+		final_waypoints = []
+		interpolate_step = 0.5
+		#interpolate raw trajectory
+		for i in range(len(raw_traj_array)-1):
+		    # print('waypoint%d'%i)
+		    from_state = asarray(raw_traj_array[i])
+		    to_state = asarray(raw_traj_array[i+1])
+		    interpolated_waypoints = self.interpolate(from_state, to_state, interpolate_step)
+		    final_waypoints.extend(interpolated_waypoints)
+
+		#create traj instance for execution
+		traj = RaveCreateTrajectory(self.env, '')
+		traj.Init(self.robot.GetActiveConfigurationSpecification())
+		traj.Insert(0,self.robot.GetActiveDOFValues())
+		print('len(final_waypoints)',len(final_waypoints))
+		for i in range(len(final_waypoints)):
+		    traj.Insert(i+1,final_waypoints[i])
+
+		interpolated_traj = traj
+		return final_waypoints
+
+
+
+	def interpolate(self, from_state, to_state, interpolate_step):
+	    """Return list of arrays
+
+	    	Args:
+	    		from_state: DoF dimension array
+	    		to_state: DoF dimension array
+	    		interpolate_step: step_length between two interpolate points
+	    	Return:
+	    		interpolated_waypoints: list of arrays including from_state
+	    """
+	    interpolated_waypoints = [from_state]
+	    stepLength = sqrt(sum((to_state-from_state)**2))
+	    print('stepLength',stepLength)
+	    interpolated_points_num = int(stepLength / interpolate_step) 
+	    disp = to_state - from_state
+	    for i in range(interpolated_points_num):
+	        ratio = (i+1)*interpolate_step / stepLength
+	        new_state = from_state + disp * ratio
+	        interpolated_waypoints.append(new_state)
+
+	    return interpolated_waypoints
