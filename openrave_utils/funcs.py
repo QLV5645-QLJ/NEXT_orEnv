@@ -100,7 +100,7 @@ def record_trajectory_withobs(start,end,traj,fileId):
     start = list(numpy.around(numpy.array(start),5))
     traj =  (numpy.around(numpy.array(traj),5)).tolist()
     obs_aabb = [[[0.7,0.3,-0.2],[1.0,0.4,0.4]],[[0.7,-0.2,-0.2],[1.0,-0.1,0.4]],[[0.7,-0.2,0.4],[1.0,0.4,0.5]],[[0.7,-0.2,-0.2],[1.0,0.4,-0.3]]] #2.6,-1.3,1.0 is the center point of the frame
-    with open('/clever/dataset/roboArm_3/data_%d.txt'%fileId, 'a') as f:
+    with open('/clever/dataset/roboArm_4/data_%d.txt'%fileId, 'a') as f:
         f.write("obtacles: "+str(obs_aabb)+"\n")
         f.write("start: "+str(start)+"\n")
         f.write("tajectories: "+str(traj)+"\n")
@@ -111,14 +111,24 @@ def record_trajectory_endEffecor(start,end,traj,fileId):
     end = list(numpy.around(numpy.array(end),5))
     start = list(numpy.around(numpy.array(start),5))
     traj =  (numpy.around(numpy.array(traj),5)).tolist()
-    obs_aabb = [[[0.7,0.3,-0.2],[1.0,0.4,0.4]],[[0.7,-0.2,-0.2],[1.0,-0.1,0.4]],[[0.7,-0.2,0.4],[1.0,0.4,0.5]],[[0.7,-0.2,-0.2],[1.0,0.4,-0.3]]] #2.6,-1.3,1.0 is the center point of the frame
-    with open('/clever/dataset/roboArm_3/data_%d_endeffecotr.txt'%fileId, 'a') as f:
+    obs_aabb = [[[0.7,0.3,-0.2],[1.0,0.4,0.4]],[[0.7,-0.2,-0.2],[1.0,-0.1,0.4]],[[0.7,-0.2,0.4],[1.0,0.4,0.5]],[[0.7,-0.2,-0.3],[1.0,0.4,-0.2]]] #2.6,-1.3,1.0 is the center point of the frame
+    with open('/clever/dataset/roboArm_4/data_%d_endeffecotr.txt'%fileId, 'a') as f:
         f.write("obtacles: "+str(obs_aabb)+"\n")
         f.write("start: "+str(start)+"\n")
         f.write("tajectories: "+str(traj)+"\n")
         f.write("end: "+str(end)+"\n")
     f.close()
 
+def collect_files():
+    fileids = [21,22]
+    with open('/clever/dataset/roboArm_3/data_all.txt', 'a+') as wf:
+        for id in fileids:
+            with open('/clever/dataset/roboArm_3/data_%d.txt'%id, 'r') as rf:
+                print(id)
+                trajs = rf.read()
+                wf.write(trajs)
+
 
 if __name__ == "__main__":
-    record_trajectory_withobs(start=[1.0,1.0],end=[0.31,0.31],traj=[[1.0,1.0],[0.2,0.2]],fileId=3)
+    # record_trajectory_withobs(start=[1.0,1.0],end=[0.31,0.31],traj=[[1.0,1.0],[0.2,0.2]],fileId=3)
+    collect_files()
