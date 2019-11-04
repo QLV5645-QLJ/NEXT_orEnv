@@ -40,7 +40,7 @@ def main(env,options):
     if(start_config is None):
         print("initialize robot arm eith failure")
         exit()
-    execute_activeDOFValues(solution=start_config,robot=robot,env=env)   
+    execute_activeDOFValues(solution=start_config,robot=robot,env=env)
     time.sleep(0.1)
     
 

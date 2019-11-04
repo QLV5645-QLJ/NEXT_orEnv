@@ -65,7 +65,7 @@ def getData_trajectory(traj):
         # stepLength = sqrt(sum((traj_array[i+1,]-traj_array[i,])**2))
         stepLength = sum(abs(traj_array[i+1,]-traj_array[i,]))
         # print("step%d delta:"%i,(traj_array[i+1,]-traj_array[i,]))
-        # print("step%d length: %f"%(i,stepLength))
+        print("step%d length: %f"%(i,stepLength))
     print("trajectory num:",num)
     return traj_array
     # print("duration",duration)
@@ -89,7 +89,7 @@ def generate_goalIk_exp1(right=True,robot=None,pos=None):
         goal[2,3] = pos[2] + random.uniform(-0.3,0.3)#Thand[2,3] + random.rand(1)/10
         solution = robot.GetActiveManipulator().FindIKSolution(goal,True)
         if(solution is not None):
-            print("goal pose:",goal[0,3],goal[1,3],goal[2,3])
+            # print("goal pose:",goal[0,3],goal[1,3],goal[2,3])
             break
     goal_pos =  [goal[0,3],goal[1,3],goal[2,3]]
     # print("goal:",goal[0:3,3])
@@ -99,7 +99,7 @@ def record_trajectory_withobs(start,end,traj,fileId):
     end = list(numpy.around(numpy.array(end),5))
     start = list(numpy.around(numpy.array(start),5))
     traj =  (numpy.around(numpy.array(traj),5)).tolist()
-    obs_aabb = [[[0.7,0.3,-0.2],[1.0,0.4,0.4]],[[0.7,-0.2,-0.2],[1.0,-0.1,0.4]],[[0.7,-0.2,0.4],[1.0,0.4,0.5]],[[0.7,-0.2,-0.2],[1.0,0.4,-0.3]]] #2.6,-1.3,1.0 is the center point of the frame
+    obs_aabb = [[[0.7,0.3,-0.2],[1.0,0.4,0.4]],[[0.7,-0.2,-0.2],[1.0,-0.1,0.4]],[[0.7,-0.2,0.4],[1.0,0.4,0.5]],[[0.6,-0.4,-0.2],[1.0,0.6,-0.3]]] #2.6,-1.3,1.0 is the center point of the frame
     with open('/clever/dataset/roboArm_4/data_%d.txt'%fileId, 'a') as f:
         f.write("obtacles: "+str(obs_aabb)+"\n")
         f.write("start: "+str(start)+"\n")
@@ -111,7 +111,7 @@ def record_trajectory_endEffecor(start,end,traj,fileId):
     end = list(numpy.around(numpy.array(end),5))
     start = list(numpy.around(numpy.array(start),5))
     traj =  (numpy.around(numpy.array(traj),5)).tolist()
-    obs_aabb = [[[0.7,0.3,-0.2],[1.0,0.4,0.4]],[[0.7,-0.2,-0.2],[1.0,-0.1,0.4]],[[0.7,-0.2,0.4],[1.0,0.4,0.5]],[[0.7,-0.2,-0.3],[1.0,0.4,-0.2]]] #2.6,-1.3,1.0 is the center point of the frame
+    obs_aabb = [[[0.7,0.3,-0.2],[1.0,0.4,0.4]],[[0.7,-0.2,-0.2],[1.0,-0.1,0.4]],[[0.7,-0.2,0.4],[1.0,0.4,0.5]],[[0.6,-0.4,-0.2],[1.0,0.6,-0.3]]] #2.6,-1.3,1.0 is the center point of the frame
     with open('/clever/dataset/roboArm_4/data_%d_endeffecotr.txt'%fileId, 'a') as f:
         f.write("obtacles: "+str(obs_aabb)+"\n")
         f.write("start: "+str(start)+"\n")
@@ -128,7 +128,23 @@ def collect_files():
                 trajs = rf.read()
                 wf.write(trajs)
 
+def interpolate(from_state, to_state, ratio):
+    """
+    if from_state <= to_state: roate in nishizhen
+    if from_state > to_state: rotate in shunshizhen
+    """
+    import numpy as np
+    disp = None
+    dim_state = from_state.shape[0]
+    disp = to_state - from_state
+    new_state = from_state + disp * ratio
+    return new_state
+
 
 if __name__ == "__main__":
     # record_trajectory_withobs(start=[1.0,1.0],end=[0.31,0.31],traj=[[1.0,1.0],[0.2,0.2]],fileId=3)
-    collect_files()
+    from_state = random.randint(6, size=7)
+    to_state = random.randint(6, size=7)
+    print(from_state)
+    print(to_state)
+    print interpolate(from_state,to_state,0.1)
