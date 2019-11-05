@@ -100,7 +100,7 @@ def record_trajectory_withobs(start,end,traj,fileId):
     start = list(numpy.around(numpy.array(start),5))
     traj =  (numpy.around(numpy.array(traj),5)).tolist()
     obs_aabb = [[[0.7,0.3,-0.2],[1.0,0.4,0.4]],[[0.7,-0.2,-0.2],[1.0,-0.1,0.4]],[[0.7,-0.2,0.4],[1.0,0.4,0.5]],[[0.6,-0.4,-0.2],[1.0,0.6,-0.3]]] #2.6,-1.3,1.0 is the center point of the frame
-    with open('/clever/dataset/roboArm_4/data_%d.txt'%fileId, 'a') as f:
+    with open('/clever/dataset/roboArm_5/data_%d.txt'%fileId, 'a') as f:
         f.write("obtacles: "+str(obs_aabb)+"\n")
         f.write("start: "+str(start)+"\n")
         f.write("tajectories: "+str(traj)+"\n")
@@ -139,6 +139,48 @@ def interpolate(from_state, to_state, ratio):
     disp = to_state - from_state
     new_state = from_state + disp * ratio
     return new_state
+
+def write_data(init_state,goal_state):
+    init = list(np.array(init_state))
+    goal = list(np.array(goal_state))
+    with open('dataset/tasks.txt', 'a+') as f:
+        f.write("start: "+str(init)+"\n")
+        f.write("end: "+str(goal)+"\n")
+    f.close()
+    return
+
+def read_tasks(filename):
+    import re
+    import numpy as np
+    init_array = None
+    goal_array = None
+    init_list = []
+    goal_list = []
+    lines = None
+    p = r"[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?"
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    for i in range(len(lines)/2):
+        init_nums = [float(s) for s in re.findall(p, lines[2*i])]
+        goal_nums = [float(s) for s in re.findall(p, lines[2*i+1])]
+        init_list.append(list(init_nums))
+        goal_list.append(list(goal_nums))
+    init_array = np.array(init_list)
+    goal_array = np.array(goal_list)
+
+    print init_array.shape
+    print goal_array.shape
+    # print init_array
+    # print goal_array
+
+    return init_array,goal_array
+
+def generate_tasks(controller,num):
+    for i in range(num):
+        from_state = controller.set_initState()
+        to_state = controller.get_goalState()
+        write_data(from_state,to_state)
+    return
 
 
 if __name__ == "__main__":

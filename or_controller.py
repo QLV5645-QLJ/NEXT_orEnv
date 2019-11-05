@@ -54,7 +54,7 @@ class ORController:
 		start_config,start_pos = generate_goalIk_exp1(right=True,robot=self.robot,pos=self.outside_pos_center)
 		execute_activeDOFValues(solution=start_config,robot=self.robot,env=self.env)
 		self.current_initState = np.array(start_config)
-		time.sleep(0.5)
+		time.sleep(0.1)
 
 		if(preprocess_state):
 			self.process_state(start_config)
@@ -68,7 +68,7 @@ class ORController:
 		goal_config,goal_pos = generate_goalIk_exp1(right=False,robot=self.robot,pos=self.inside_pos_center)
 		execute_activeDOFValues(solution=goal_config,robot=self.robot,env=self.env)
 		self.current_goalState = np.array(goal_config)
-		time.sleep(0.5)
+		time.sleep(0.1)
 
 		if(preprocess_state):
 			self.process_state(goal_config)
@@ -215,6 +215,15 @@ def test_collisionChecker():
 	collision_flag = controller.check_collision(state = free_state)
 	print("collision state:",collision_flag)
 
+def test_stepPath():
+	controller = ORController()
+	from_state = controller.set_initState()
+	to_state = controller.get_goalState()
+	print np.round(np.array(from_state),4) 
+	print np.round(np.array(to_state),4) 
+	time.sleep(5)
+	controller.step_path(start_state=from_state,goal_state=to_state)
+	time.sleep(5)
 
 if __name__ == "__main__":
 	"""
@@ -227,12 +236,5 @@ if __name__ == "__main__":
 	3.15904595]
 	"""
 	controller = ORController()
-	from_state = controller.set_initState()
-	to_state = controller.get_goalState()
-	print np.round(np.array(from_state),4) 
-	print np.round(np.array(to_state),4) 
-	time.sleep(5)
-	controller.step_path(start_state=from_state,goal_state=to_state)
-	time.sleep(5)
-	# controller.retime_path(start_state=from_state,goal_state=to_state)
-	# controller.smooth_path(start_state=from_state,goal_state=to_state)
+	generate_tasks(controller,3000)
+	read_tasks('dataset/tasks.txt')
