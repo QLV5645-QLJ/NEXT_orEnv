@@ -83,8 +83,8 @@ def main(env,options):
             continue
 
         #record trjectory if available
-        record_trajectory_withobs(start=start_config,end=goal_config,
-            traj=interpolated_traj,fileId=rank)
+        # record_trajectory_withobs(start=start_config,end=goal_config,
+            # traj=interpolated_traj,fileId=rank)
 
         # Execute the trajectory.
         robot.GetController().SetPath(traj)

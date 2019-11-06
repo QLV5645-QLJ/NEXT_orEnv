@@ -100,7 +100,7 @@ def record_trajectory_withobs(start,end,traj,fileId):
     start = list(numpy.around(numpy.array(start),5))
     traj =  (numpy.around(numpy.array(traj),5)).tolist()
     obs_aabb = [[[0.7,0.3,-0.2],[1.0,0.4,0.4]],[[0.7,-0.2,-0.2],[1.0,-0.1,0.4]],[[0.7,-0.2,0.4],[1.0,0.4,0.5]],[[0.6,-0.4,-0.2],[1.0,0.6,-0.3]]] #2.6,-1.3,1.0 is the center point of the frame
-    with open('/clever/dataset/roboArm_5/data_%d.txt'%fileId, 'a') as f:
+    with open('/clever/dataset/roboArm_6/data_%d.txt'%fileId, 'a') as f:
         f.write("obtacles: "+str(obs_aabb)+"\n")
         f.write("start: "+str(start)+"\n")
         f.write("tajectories: "+str(traj)+"\n")
@@ -118,6 +118,19 @@ def record_trajectory_endEffecor(start,end,traj,fileId):
         f.write("tajectories: "+str(traj)+"\n")
         f.write("end: "+str(end)+"\n")
     f.close()
+
+def record_trajectory_randomObs(start,end,traj,aabb_list,fileId):
+    end = list(numpy.around(numpy.array(end),5))
+    start = list(numpy.around(numpy.array(start),5))
+    traj =  (numpy.around(numpy.array(traj),5)).tolist()
+    obs_aabb = list(aabb_list)
+    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/dynamics/data_%d.txt'%fileId, 'a') as f:
+        f.write("obtacles: "+str(obs_aabb)+"\n")
+        f.write("start: "+str(start)+"\n")
+        f.write("tajectories: "+str(traj)+"\n")
+        f.write("end: "+str(end)+"\n")
+    f.close()
+
 
 def collect_files():
     fileids = [21,22]
@@ -141,6 +154,7 @@ def interpolate(from_state, to_state, ratio):
     return new_state
 
 def write_data(init_state,goal_state):
+    import numpy as np
     init = list(np.array(init_state))
     goal = list(np.array(goal_state))
     with open('dataset/tasks.txt', 'a+') as f:
@@ -178,6 +192,7 @@ def read_tasks(filename):
 def generate_tasks(controller,num):
     for i in range(num):
         from_state = controller.set_initState()
+        time.sleep(20)
         to_state = controller.get_goalState()
         write_data(from_state,to_state)
     return

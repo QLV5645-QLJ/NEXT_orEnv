@@ -221,7 +221,6 @@ def test_stepPath():
 	to_state = controller.get_goalState()
 	print np.round(np.array(from_state),4) 
 	print np.round(np.array(to_state),4) 
-	time.sleep(5)
 	controller.step_path(start_state=from_state,goal_state=to_state)
 	time.sleep(5)
 

@@ -61,6 +61,17 @@ def preprocess_aabb(aabb):
             aabb[1][i] =temp
     return
 
+def test_dynamicEnv(obs_aabb):
+    width = 2.0
+    resolution = 0.1
+    # obs_aabb = [[[0.7,0.3,-0.2],[1.0,0.4,0.4]],[[0.7,-0.2,-0.2],[1.0,-0.1,0.4]],[[0.7,-0.2,0.4],[1.0,0.4,0.5]],
+    # [[0.6,-0.4,-0.2],[1.0,0.6,-0.3]]] #2.6,-1.3,1.0 is the center point of the frame
+    map = gridMap(width=width,resolution=resolution)
+    for aabb in obs_aabb:
+        map.add_obstacle(aabb)
+    visulaize_map(map.get_map())
+    return   
+
 if __name__ == '__main__':
     width = 2.0
     resolution = 0.1
