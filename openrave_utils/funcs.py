@@ -343,6 +343,46 @@ def transform_obb(aabb_list):
         positions.append([pos_x,pos_y,pos_z])
     return shapes,positions
 
+def read_result(filename):
+    import re
+    import numpy as np
+    path_num = 0.0
+    success_num = 0.0
+    total_sucess_time = 0.0
+    lines = None
+    p = r"[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?"
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    for i in range(len(lines)):
+        nums = [float(s) for s in re.findall(p, lines[i])]
+        # print nums
+        path_num += nums[0]
+        success_num +=nums[1]
+        total_sucess_time += nums[2]
+    return path_num,success_num,total_sucess_time
+
+def read_NEXT_result(filename):
+    import re
+    import numpy as np
+    path_num = 0.0
+    success_num = 0.0
+    total_sucess_time = 0.0
+    success_iters = 0.0
+    lines = None
+    p = r"[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?"
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    num_data = len(lines)/2
+    for i in range(num_data):
+        nums = [float(s) for s in re.findall(p, lines[2*i+1])]
+        # print nums
+        path_num += nums[0]
+        success_num +=(nums[1]*nums[0])
+        success_iters += nums[2]
+        total_sucess_time += (nums[3]*nums[1]*nums[0])
+    # print path_num,success_num,total_sucess_time
+    return path_num,success_num,total_sucess_time
+
 if __name__ == "__main__":
     obs_list,init_array,goal_array = read_task_withObs("../dataset/tasks_dynamics.txt")
     print obs_list[5]

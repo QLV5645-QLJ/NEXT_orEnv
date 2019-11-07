@@ -1,0 +1,20 @@
+Goal_bias:0.050000 C_select:10.000000  K_expand:10.000000  C_expand:10.000000 ValudeModel_std:0.092000 
+evaluate num: 300.00 success rate: 0.77, average sucess iters: 273.24, average_success_time : 2.5529
+Goal_bias:0.050000 C_select:10.000000  K_expand:10.000000  C_expand:10.000000 ValudeModel_std:0.092000 
+evaluate num: 300.00 success rate: 0.74, average sucess iters: 284.83, average_success_time : 2.3409
+Goal_bias:0.050000 C_select:10.000000  K_expand:10.000000  C_expand:10.000000 ValudeModel_std:0.092000 
+evaluate num: 300.00 success rate: 0.73, average sucess iters: 301.61, average_success_time : 2.0161
+Goal_bias:0.050000 C_select:10.000000  K_expand:10.000000  C_expand:10.000000 ValudeModel_std:0.092000 
+evaluate num: 300.00 success rate: 0.69, average sucess iters: 320.36, average_success_time : 1.7061
+Goal_bias:0.050000 C_select:10.000000  K_expand:10.000000  C_expand:10.000000 ValudeModel_std:0.092000 
+evaluate num: 300.00 success rate: 0.70, average sucess iters: 315.90, average_success_time : 2.3254
+Goal_bias:0.050000 C_select:10.000000  K_expand:10.000000  C_expand:10.000000 ValudeModel_std:0.092000 
+evaluate num: 300.00 success rate: 0.74, average sucess iters: 291.84, average_success_time : 2.4260
+Goal_bias:0.050000 C_select:10.000000  K_expand:10.000000  C_expand:10.000000 ValudeModel_std:0.092000 
+evaluate num: 300.00 success rate: 0.72, average sucess iters: 296.15, average_success_time : 2.1565
+Goal_bias:0.050000 C_select:10.000000  K_expand:10.000000  C_expand:10.000000 ValudeModel_std:0.092000 
+evaluate num: 300.00 success rate: 0.72, average sucess iters: 305.00, average_success_time : 2.4948
+Goal_bias:0.050000 C_select:10.000000  K_expand:10.000000  C_expand:10.000000 ValudeModel_std:0.092000 
+evaluate num: 300.00 success rate: 0.72, average sucess iters: 304.30, average_success_time : 2.5972
+Goal_bias:0.050000 C_select:10.000000  K_expand:10.000000  C_expand:10.000000 ValudeModel_std:0.092000 
+evaluate num: 300.00 success rate: 0.72, average sucess iters: 306.41, average_success_time : 2.4966
