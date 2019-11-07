@@ -5,6 +5,7 @@ import openravepy
 if not __openravepy_build_doc__:
     from openravepy import *
     from numpy import *
+import numpy as np
 def current_dofValues(robot):
     manipulator = robot.GetManipulator('arm')   
     return robot.GetDOFValues(manipulator.GetArmIndices())   
@@ -95,6 +96,58 @@ def generate_goalIk_exp1(right=True,robot=None,pos=None):
     # print("goal:",goal[0:3,3])
     return solution,goal_pos
 
+def generate_goalIk_exp2(right=True,robot=None,pos=None):
+    """
+    generate ik solution of the right of the board
+    """
+    goal = eye(4,dtype=float)
+    delta_y = 0
+    solution = None
+    if(right):
+        delta_y = 0.6
+    else:
+        delta_y = -0.6
+
+    for i in range(10000):
+        #box position 3.5 -1.3 0.74
+        goal[0,3] = pos[0] + random.uniform(-0.1,0.1)#(-0.3,0.3)#Thand[0,3] + random.rand(1)/10
+        goal[1,3] = pos[1] + random.uniform(0.0,delta_y)#Thand[1,3] + random.rand(1)/10
+        goal[2,3] = pos[2] + random.uniform(-1.0,1.0)#Thand[2,3] + random.rand(1)/10
+        solution = robot.GetActiveManipulator().FindIKSolution(goal,True)
+        if(solution is not None):
+            # print("goal pose:",goal[0,3],goal[1,3],goal[2,3])
+            break
+    goal_pos =  [goal[0,3],goal[1,3],goal[2,3]]
+    # print("goal:",goal[0:3,3])
+    return solution,goal_pos
+
+def generate_goalIk_shelf(robot=None,center_pos=None,pos_contraint=False,contrained_pos=None):
+    """
+    generate ik solution of the right of the board
+    """
+    goal = eye(4,dtype=float)
+    delta_y = 0.6
+    delta_x = [0.6,0.9]
+    delta_z = 1.0 
+    solution = None
+    start_pos_array = np.asarray(contrained_pos)
+
+    for i in range(5000):
+        #box position 3.5 -1.3 0.74
+        goal[0,3] = center_pos[0] + random.uniform(delta_x[0],delta_x[1])#(-0.3,0.3)#Thand[0,3] + random.rand(1)/10
+        goal[1,3] = center_pos[1] + random.uniform(-delta_y,delta_y)#Thand[1,3] + random.rand(1)/10
+        goal[2,3] = center_pos[2] + random.uniform(-delta_z,delta_z)#Thand[2,3] + random.rand(1)/10
+        solution = robot.GetActiveManipulator().FindIKSolution(goal,True)
+        if(pos_contraint):
+            goal_pos_array = np.array( [goal[0,3],goal[1,3],goal[2,3]])
+            if(np.sqrt(np.sum((start_pos_array-goal_pos_array)**2))<0.5):
+                continue
+        if(solution is not None):
+            break
+    goal_pos =  [goal[0,3],goal[1,3],goal[2,3]]
+    # print("goal:",goal[0:3,3])
+    return solution,goal_pos
+
 def record_trajectory_withobs(start,end,traj,fileId):
     end = list(numpy.around(numpy.array(end),5))
     start = list(numpy.around(numpy.array(start),5))
@@ -124,7 +177,7 @@ def record_trajectory_randomObs(start,end,traj,aabb_list,fileId):
     start = list(numpy.around(numpy.array(start),5))
     traj =  (numpy.around(numpy.array(traj),5)).tolist()
     obs_aabb = list(aabb_list)
-    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/dynamics/data_%d.txt'%fileId, 'a') as f:
+    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/shelf/data_%d.txt'%fileId, 'a') as f:
         f.write("obtacles: "+str(obs_aabb)+"\n")
         f.write("start: "+str(start)+"\n")
         f.write("tajectories: "+str(traj)+"\n")
@@ -133,13 +186,21 @@ def record_trajectory_randomObs(start,end,traj,aabb_list,fileId):
 
 
 def collect_files():
-    fileids = [21,22]
-    with open('/clever/dataset/roboArm_3/data_all.txt', 'a+') as wf:
+    from os import path
+    fileids = range(300)
+    num_data = 0
+    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/data_shelf.txt', 'a+') as wf:
         for id in fileids:
-            with open('/clever/dataset/roboArm_3/data_%d.txt'%id, 'r') as rf:
-                print(id)
-                trajs = rf.read()
-                wf.write(trajs)
+            if(path.exists('/root/catkin_ws/NEXT_ws/simulation/dataset/shelf/data_%d.txt'%id)):
+                with open('/root/catkin_ws/NEXT_ws/simulation/dataset/shelf/data_%d.txt'%id, 'r') as rf:
+                    # trajs = rf.readlines()
+                    trajs = rf.read()
+                    # print(trajs)
+                    wf.write(trajs)
+                    # num_data += len(trajs)/4
+                    # print(len(trajs)/4)
+    # print("num data:",num_data)
+    return 
 
 def interpolate(from_state, to_state, ratio):
     """
@@ -197,11 +258,93 @@ def generate_tasks(controller,num):
         write_data(from_state,to_state)
     return
 
+def write_data_withObs(init_state,goal_state,aabb_list):
+    import numpy as np
+    init = (numpy.around(numpy.array(init_state),5)).tolist()
+    goal = (numpy.around(numpy.array(goal_state),5)).tolist()
+    obs_aabb = (numpy.around(numpy.array(aabb_list),5)).tolist()
+    with open('dataset/tasks_test.txt', 'a+') as f:
+        f.write("obtacles: "+str(obs_aabb)+"\n")
+        f.write("start: "+str(init)+"\n")
+        f.write("end: "+str(goal)+"\n")
+    f.close()
+    return
+
+def read_task_withObs(filename):
+    lines = None
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+
+    num_task = len(lines)/3
+    obs_list = []
+    init_array = np.zeros(shape=(num_task,7))
+    goal_array = np.zeros(shape=(num_task,7))
+
+    for i in range(num_task):
+        obs_line = lines[i*3].split(' ')[1:]
+        start_line = lines[3*i+1].split(' ')[1:]
+        end_line = lines[3*i+2].split(' ')[1:]
+
+        obs_mat = clean_obsLine(obs_line)
+        start_mat = clean_line(start_line)
+        end_mat = clean_line(end_line)
+        obs_aabb = get_aabbs(obs_mat)
+
+        init_array[i]=np.copy(start_mat)
+        goal_array[i] = np.copy(end_mat)
+        obs_list.append(list(obs_aabb))
+    return obs_list,init_array,goal_array
+
+def clean_entry(entry):
+    entry = entry.strip()
+    while entry[0] == '[':
+        entry = entry[1:]
+    while entry[-1] == ',':
+        entry = entry[:-1]
+    while entry[-1] == ']':
+        entry = entry[:-1]
+    entry = np.float(entry)
+    return entry
+
+def clean_obsLine(line):
+    for i in range(len(line)):
+        line[i] = clean_entry(line[i])
+    line = np.array(line).reshape((-1, 3))
+    line = np.around(line,2)
+    return line
+
+def clean_line(line):
+    for i in range(len(line)):
+        line[i] = clean_entry(line[i])
+    line = np.array(line).reshape((-1, 7))
+    return line
+
+def get_aabbs(obs_mat):
+    obs_mat = np.around(obs_mat,2)
+    num = int(len(obs_mat)/2)
+    aabbs = []
+    for i in range(num):
+        aabb_min = list(obs_mat[2*i])
+        aabb_max = list(obs_mat[2*i+1])
+        aabbs.append([aabb_min,aabb_max])
+    # print("aabbs:",aabbs)
+    return  aabbs
+
+def transform_obb(aabb_list):
+    shapes = []
+    positions = []
+    for aabb in aabb_list:
+        aabb_min = aabb[0]
+        aabb_max = aabb[1]
+        (shape_x,shape_y,shape_z) = (aabb_max[0]-aabb_min[0],aabb_max[1]-aabb_min[1],aabb_max[2]-aabb_min[2])
+        (pos_x,pos_y,pos_z) = ((aabb_max[0]+aabb_min[0])/2.0,(aabb_max[1]+aabb_min[1])/2.0,
+            (aabb_max[2]+aabb_min[2])/2.0)
+        shapes.append([shape_x,shape_y,shape_z])
+        positions.append([pos_x,pos_y,pos_z])
+    return shapes,positions
 
 if __name__ == "__main__":
-    # record_trajectory_withobs(start=[1.0,1.0],end=[0.31,0.31],traj=[[1.0,1.0],[0.2,0.2]],fileId=3)
-    from_state = random.randint(6, size=7)
-    to_state = random.randint(6, size=7)
-    print(from_state)
-    print(to_state)
-    print interpolate(from_state,to_state,0.1)
+    obs_list,init_array,goal_array = read_task_withObs("../dataset/tasks_dynamics.txt")
+    print obs_list[5]
+    print init_array[5]
+    print goal_array[5]

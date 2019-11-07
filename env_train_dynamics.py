@@ -27,11 +27,11 @@ def run():
     "Main example code."
     # load a scene from ProjectRoom environment XML file
     env = Environment()
-    # env.SetViewer('qtcoin')
+    env.SetViewer('qtcoin')
     generator = Shape_pos_generator()
     archs_shapes,archs_positions,archs_start,archs_goal = generator.generate()
     robot_pos = [2.6, -1.3, 1.0]
-    env_id = rank%215
+    env_id = rank+np.random.randint(200)#rank%215
 
     env.Load(os.getcwd()+'/worlds/exp3.env.xml')
     # create_exp2(env)
@@ -96,13 +96,8 @@ def run():
             print("no trajectory solution")
             continue
 
-        #record trjectory if available
-        # record_trajectory_withobs(start=start_config,end=goal_config,
-        #     traj=interpolated_traj,fileId=rank)
-        # record_trajectory_endEffecor(start=start_pos,end=end_pos,
-        #     traj=interpolated_traj,fileId=rank)
-        record_trajectory_randomObs(start=start_config,end=goal_config,
-            traj=interpolated_traj,fileId=rank,aabb_list = (aabb_list).tolist())
+        # record_trajectory_randomObs(start=start_config,end=goal_config,
+            # traj=interpolated_traj,fileId=rank,aabb_list = (aabb_list).tolist())
         
         # Execute the trajectory.
         robot.GetController().SetPath(traj)
@@ -111,26 +106,6 @@ def run():
 
         success_num+=1
         delta_time += (end_time-start_time)
-    # print("path num:",goal_num)
-    # print("sucess time:",success_num)
-    # print("total time:",delta_time)
-
-
-
-# from optparse import OptionParser
-# from openravepy.misc import OpenRAVEGlobalArguments
-# @openravepy.with_destroy
-# def run(args=None):
-#     """Command-line execution of the example.
-
-#     :param args: arguments for script to parse, if not specified will use sys.argv
-#     """
-#     parser = OptionParser(description='Explicitly specify goals to get a simple navigation and manipulation demo.', usage='openrave.py --example simplemanipulation [options]')
-#     OpenRAVEGlobalArguments.addOptions(parser)
-#     parser.add_option('--planner',action="store",type='string',dest='planner',default=None,
-#                       help='the planner to use')
-#     (options, leftargs) = parser.parse_args(args=args)
-#     OpenRAVEGlobalArguments.parseAndCreateThreadedUser(options,main,defaultviewer=True)
 
 
 if __name__ == "__main__":

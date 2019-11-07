@@ -19,11 +19,11 @@ def create_box(env,OBB,box_id):
 
 	return body
 
-def reCreate_box(env,body,AABB):
-	box_aabb = np.array(AABB)
+def reCreate_box(env,body,obb):
+	box_obb = np.array(obb)
 	with env:
 		env.Remove(body)
-		body.InitFromBoxes(box_aabb,True) # set geometry as two boxes
+		body.InitFromBoxes(box_obb,True) # set geometry as two boxes
 		env.AddKinBody(body)
 
 def transform_relativeAABB(relative_position,size):
@@ -76,7 +76,7 @@ def create_boxes(env,pos_list,size_list,robot_pos):
 					  obstacle aabb format
 	"""
 	body_list = []
-	aabb_list = [[[0.6,-0.4,-0.2],[1.0,0.6,-0.3]]]#table aabb
+	aabb_list = []#[[[0.6,-0.4,-0.2],[1.0,0.6,-0.3]]]#table aabb
 	for i in range(len(pos_list)):
 		transformed_aabb = transform_relativeAABB(relative_position=pos_list[i],size=size_list[i])
 		[world_box_x,world_box_y,world_box_z] = transform_pos(original_position=robot_pos,
@@ -91,6 +91,31 @@ def create_boxes(env,pos_list,size_list,robot_pos):
 	aabb_array = np.array(aabb_list)
 	aabb_array = np.around(aabb_array,2)
 	return body_list,aabb_array
+
+def Recreate_boxes(env,pos_list,size_list,body_list,robot_pos):
+	"""
+	create multiple box on env
+	pos_list: [[x,y,z]],relative position to robot position
+	size_list: [[rang_x,range_y,range_z]], box size
+	robot_pos: original position
+	return: body_list:[body1,...] box instance, 
+			aabb_list:[[[x_min,y_min,z_max],[x_max,y_max,z_max]],...] 
+					  obstacle aabb format
+	"""
+	aabb_list = []#[[[0.6,-0.4,-0.2],[1.0,0.6,-0.3]]]#table aabb
+	for i in range(len(pos_list)):
+		transformed_aabb = transform_relativeAABB(relative_position=pos_list[i],size=size_list[i])
+		[world_box_x,world_box_y,world_box_z] = transform_pos(original_position=robot_pos,
+			relative_position = pos_list[i])
+		[extend_x,extend_y,extend_z] = [size_list[i][0]/2.0,size_list[i][1]/2.0,size_list[i][2]/2.0]
+		temp_obb= np.array([[world_box_x,world_box_y,world_box_z,
+			extend_x,extend_y,extend_z]])
+		reCreate_box(env,body_list[i],temp_obb)
+		aabb_list.append(copy.copy(transformed_aabb))
+		# print("creating box",temp_obb)
+	aabb_array = np.array(aabb_list)
+	aabb_array = np.around(aabb_array,2)
+	return aabb_array
 
 if __name__ == "__main__":
 	env = Environment() # create openrave environment

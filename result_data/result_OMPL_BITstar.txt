@@ -1,0 +1,10 @@
+path num: 300.00, sucess num: 93.00 total success time: 4761.3146
+path num: 300.00, sucess num: 92.00 total success time: 4722.6372
+path num: 300.00, sucess num: 93.00 total success time: 4766.9172
+path num: 300.00, sucess num: 94.00 total success time: 4817.1059
+path num: 300.00, sucess num: 94.00 total success time: 4823.2960
+path num: 300.00, sucess num: 101.00 total success time: 5186.0068
+path num: 300.00, sucess num: 103.00 total success time: 5274.1976
+path num: 300.00, sucess num: 111.00 total success time: 5686.0347
+path num: 300.00, sucess num: 107.00 total success time: 5488.4219
+path num: 300.00, sucess num: 104.00 total success time: 5340.7607

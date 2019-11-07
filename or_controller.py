@@ -6,6 +6,7 @@ import os
 from openrave_utils.or_planner import ORPLANNER
 # from mpi4py import MPI
 from openrave_utils.funcs import *
+from openrave_utils.dynamic_env import *
 
 import openravepy
 if not __openravepy_build_doc__:
@@ -13,7 +14,9 @@ if not __openravepy_build_doc__:
     from numpy import *
 from optparse import OptionParser
 from openravepy.misc import OpenRAVEGlobalArguments
-
+from openrave_utils.generate_relative_shape_pos import *
+from openrave_utils.grid_map import *
+from openrave_utils.shelf_obb import ShelfObb
 
 class ORController:
 	"""
@@ -25,7 +28,11 @@ class ORController:
 		"""
 		self.env = Environment()
 		self.env.SetViewer('qtcoin')
-		self.env.Load('worlds/exp2.env.xml')
+		self.robot_pos = [2.6, -1.3, 1.0]
+		# self.init_shelf_env()
+		self.init_box_env()
+		self.ignore_lastAABB = True
+		task_filename = "dataset/tasks_dynamics.txt"
 		print "initialize the world"
 
 		#get robot info
@@ -44,6 +51,12 @@ class ORController:
 		self.current_initState = None
 		self.current_goalState = None
 
+		obs_list,init_array,goal_array = read_task_withObs(task_filename)
+		self.init_array = np.copy(init_array)
+		self.goal_array = np.copy(goal_array)
+		self.obs_aabbs = list(obs_list)
+		self.grid_map = None
+
 		self.handles = []
 
 	def set_initState(self,preprocess_state=False):
@@ -51,7 +64,10 @@ class ORController:
 		get and set initial collision-free state for the planning task
 		return: 7-element list[.....]
 		"""
-		start_config,start_pos = generate_goalIk_exp1(right=True,robot=self.robot,pos=self.outside_pos_center)
+		# start_config,start_pos = generate_goalIk_exp1(right=True,robot=self.robot,pos=self.outside_pos_center)
+		start_config = self.init_array[2000]
+		grid_map = self.make_env(self.obs_aabbs[2000],ignore_lastone=self.ignore_lastAABB)
+		self.grid_map = np.copy(grid_map)
 		execute_activeDOFValues(solution=start_config,robot=self.robot,env=self.env)
 		self.current_initState = np.array(start_config)
 		time.sleep(0.1)
@@ -65,7 +81,8 @@ class ORController:
 		get a collision-free goal state for the planning task
 		return: 7-element list[.....]
 		"""
-		goal_config,goal_pos = generate_goalIk_exp1(right=False,robot=self.robot,pos=self.inside_pos_center)
+		# goal_config,goal_pos = generate_goalIk_exp1(right=False,robot=self.robot,pos=self.inside_pos_center)
+		goal_config = self.goal_array[2000]
 		execute_activeDOFValues(solution=goal_config,robot=self.robot,env=self.env)
 		self.current_goalState = np.array(goal_config)
 		time.sleep(0.1)
@@ -203,6 +220,53 @@ class ORController:
 		pose.append(t[2][3])
 		return pose
 
+	def make_env(self,aabbs_list,ignore_lastone=True):
+		"""
+		recreate environemnts
+		return: corresponding grid map
+		"""
+		shape,positions = None,None
+		if(ignore_lastone):
+			shapes,positions = transform_obb(aabbs_list[0:-1])
+		else:
+			shapes,positions = transform_obb(aabbs_list)
+		box_aabb_list = Recreate_boxes(env=self.env,pos_list=list(positions),
+			size_list=list(shapes),body_list=self.body_list,robot_pos=list(self.robot_pos))
+		gridmap = self.create_gridMap(aabbs_list)
+
+		return np.copy(gridmap)
+
+	def init_box_env(self):
+		"""
+		initialize environments
+		"""
+		self.env.Load('worlds/exp3.env.xml')
+		# generator = Shape_pos_generator()
+		# archs_shapes,archs_positions,archs_start,archs_goal = generator.generate()
+		# print archs_positions[0]
+		# print archs_shapes[0]
+		shapes = [[0.7999999999999999, -0.25, 0.04999999999999999], [0.7999999999999999, 0.15, 0.04999999999999999], [0.7999999999999999, -0.05000000000000002, 0.35000000000000003]]
+		positions = [[0.2, 0.1, 0.5], [0.2, 0.1, 0.5], [0.2, 0.5, 0.1]]
+		self.body_list,aabb_list = create_boxes(env=self.env,pos_list=positions,
+			size_list=shapes,robot_pos=self.robot_pos)
+		return 
+
+	def init_shelf_env(self):
+		self.env.Load('worlds/exp4.env.xml')
+		shapes = [[0.3, 0.1, 2.0], [0.3, 0.1, 2.0], [0.3, 1.2, 0.1], [0.3, 1.2, 0.1], [0.3, 1.2, 0.1], [0.3, 1.2, 0.1], [0.3, 0.1, 0.5], [0.3, 0.1, 1.1], [0.3, 0.1, 0.49999999999999994]]
+		positions = [[0.75, 0.5499999999999999, 0.0], [0.75, -0.5499999999999999, 0.0], [0.75, 0.0, 0.95], [0.75, 0.0, -0.95], [0.75, 0.0, 0.45], [0.75, 0.0, -0.55], [0.75, -0.05, 0.75], [0.75, -0.05, -0.05000000000000002], [0.75, -0.05, -0.75]]
+		self.body_list,aabb_list = create_boxes(env=self.env,pos_list=positions,
+			size_list=shapes,robot_pos=self.robot_pos)
+		return 
+
+	def create_gridMap(self,obs_aabb):
+		width = 2.0
+		resolution = 0.1
+		map = gridMap(width=width,resolution=resolution)
+		for aabb in obs_aabb:
+			map.add_obstacle(aabb)
+		return   np.copy(map.get_map())
+
 def test_collisionChecker():
 	controller = ORController()
 	controller.set_initState()
@@ -235,5 +299,10 @@ if __name__ == "__main__":
 	3.15904595]
 	"""
 	controller = ORController()
-	generate_tasks(controller,3000)
-	read_tasks('dataset/tasks.txt')
+	controller.set_initState()
+	time.sleep(2)
+	visulaize_map(controller.grid_map)
+	controller.get_goalState()
+	time.sleep(5)
+	# generate_tasks(controller,3000)
+	# read_tasks('dataset/tasks.txt')

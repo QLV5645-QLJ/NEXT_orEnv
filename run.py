@@ -1,0 +1,3 @@
+from generate_utils.task_generation_shelf import *
+import generate_utils.task_generation_dynamics as task_generation_dynamics
+task_generation_dynamics.run()
