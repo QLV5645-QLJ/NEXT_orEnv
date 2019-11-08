@@ -66,8 +66,8 @@ def getData_trajectory(traj):
         # stepLength = sqrt(sum((traj_array[i+1,]-traj_array[i,])**2))
         stepLength = sum(abs(traj_array[i+1,]-traj_array[i,]))
         # print("step%d delta:"%i,(traj_array[i+1,]-traj_array[i,]))
-        print("step%d length: %f"%(i,stepLength))
-    print("trajectory num:",num)
+        # print("step%d length: %f"%(i,stepLength))
+    # print("trajectory num:",num)
     return traj_array
     # print("duration",duration)
 

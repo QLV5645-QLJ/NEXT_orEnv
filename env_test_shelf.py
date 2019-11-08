@@ -16,6 +16,7 @@ from optparse import OptionParser
 from openravepy.misc import OpenRAVEGlobalArguments
 from openrave_utils.shelf_obb import *
 from openrave_utils.dynamic_env import *
+from openrave_utils.result_notebook import resultNotebook,save_result
 
 def waitrobot(robot):
     """busy wait for robot completion"""
@@ -62,10 +63,12 @@ def run():
     planner_name = "OMPL_RRTstar"
     orplanner = ORPLANNER(robot=robot,env=env,planner_name = planner_name,
         time_limit = time_limit, motion_range = motion_range,samples_per_batch=sample_per_batch)
-    goal_num = 60
+    goal_num = 100
     success_num = 0
     inside = True
     delta_time = 0.0
+
+    res_notebook = resultNotebook()
     for i in range(goal_num):
         print("time_limit: %f motion_range:%f sample_per_batch:%f "%(time_limit,motion_range,sample_per_batch))
         print("path num:",i)
@@ -100,8 +103,15 @@ def run():
         traj,interpolated_traj = orplanner.plan_traj()
         end_time = time.time()
         if(traj is None):
+            res_notebook.append(success=False,init_state=start_config,goal_state=goal_config)
             print("no trajectory solution")
             continue
+        else:
+            # print interpolated_traj
+            # path_array = getData_trajec
+            res_notebook.append(success=True,init_state=start_config,goal_state=goal_config,
+                path_array=np.array(interpolated_traj))
+
 
         #record trjectory if available
         # record_trajectory_withobs(start=start_config,end=goal_config,
@@ -114,9 +124,10 @@ def run():
 
         success_num+=1
         delta_time += (end_time-start_time)
-    result_string = "path num: %.2f, sucess num: %.2f total success time: %.4f"%(goal_num,success_num,delta_time)
-    with open('result_data/result_%s_shelf.txt'%planner_name,'a+') as f:
-        f.write(result_string+"\n")
+    # result_string = "path num: %.2f, sucess num: %.2f total success time: %.4f"%(goal_num,success_num,delta_time)
+    # with open('result_data/result_%s_shelf.txt'%planner_name,'a+') as f:
+        # f.write(result_string+"\n")
+    save_result(res_notebook,"result_data/%s_shelf_%drank_%ds.pkl"%(planner_name,rank,int(time_limit)))
     f.close()
 
 
