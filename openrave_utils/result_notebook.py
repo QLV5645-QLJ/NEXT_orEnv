@@ -39,32 +39,31 @@ def get_length(path_array):
         path_length += motion_length
     return path_length
 
-def load_test(planner_name):
+def load_test(planner_name,dirname="result_data_shelf/"):
 	import pickle
+	import glob
 	# planner_name = "OMPL_RRTstar"
-	time_limits = [5,10,20,50]
+	time_limits = [5,10,15,20,25,30,35,40,45,50]
 	for time_limit in time_limits:
 		task_num = 0
 		success_num = 0
 		total_path_length = 0.0
-		rank_ids = range(time_limit/5)
-		for rank in rank_ids:
-			filename = "result_data/%s_shelf_%drank_%ds.pkl"%(planner_name,rank,time_limit)
+		# rank_ids = range(time_limit/5)
+		files = glob.glob(dirname+"%s_shelf_*_%ds.pkl"%(planner_name,time_limit))
+		for filename in files:
+			# filename = "result_data/%s_shelf_%drank_%ds.pkl"%(planner_name,rank,time_limit)
+			# print filename
 			result = pickle.load(open(filename,"rb"))
-			task_num += result.task
-			success_num += result.success_count
 			for (nb_id,nb) in enumerate(result.notebook):
 				if(nb.success):
-					num_mpi = time_limit/5
-					task_id = rank*(1000/num_mpi)+nb_id
+					task_id = task_num + nb_id
 					path_length = get_length(nb.path)
-					# print("task id:",task_id,path_length)
-					# if(task_id==370):
-						# print((nb.path.tolist()))
 					total_path_length += path_length
 				else:
 					penalty = 50.0
 					total_path_length += penalty
+			task_num += result.task
+			success_num += result.success_count
 		success_rate = success_num*1.0/task_num*1.0
 		average_path_length= total_path_length/task_num*1.0
 		print("planner: %s, time limit = %d, success rate = %f, average path cost = %f"%(

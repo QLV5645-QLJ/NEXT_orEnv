@@ -111,19 +111,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-
-# if __name__ == "__main__":
-# 	test = ShelfObb()
-# 	frame_shapes,frame_positions =test.generate_frames()
-# 	board_shapes,board_positions = test.generate_borad_obb()
-# 	shapes = frame_shapes + board_shapes
-# 	positions = frame_positions + board_positions
-# 	print shapes
-# 	print positions
-
-# 	env = Environment()
-# 	env.SetViewer('qtcoin')
-# 	env.Load(os.getcwd()+'/worlds/exp4.env.xml')
-# 	robot_pos = [2.6, -1.3, 1.0]	
-# 	body_list,aabb_list = create_boxes(env=env,pos_list=positions,size_list=shapes,robot_pos=robot_pos)
-# 	time.sleep(10)

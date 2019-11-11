@@ -17,6 +17,11 @@ from openravepy.misc import OpenRAVEGlobalArguments
 from openrave_utils.shelf_obb import *
 from openrave_utils.dynamic_env import *
 from openrave_utils.result_notebook import resultNotebook,save_result
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--time_limit', type=float, default=5)
+args = parser.parse_args()
+
 
 def waitrobot(robot):
     """busy wait for robot completion"""
@@ -28,7 +33,9 @@ def run():
     # env.SetViewer('qtcoin')
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
-    print("rank:",rank)
+    mpi_size = comm.Get_size()
+
+    print("rank:",rank,"size: ",mpi_size)
 
     "Main example code."
     # load a scene from ProjectRoom environment XML file
@@ -57,13 +64,13 @@ def run():
     goal_states = np.copy(goal_array)
 
     #use palner to plan path
-    time_limit = 50.0
+    time_limit = args.time_limit#5.0
     motion_range = 20.0
     sample_per_batch = 100.0
     planner_name = "OMPL_RRTstar"
     orplanner = ORPLANNER(robot=robot,env=env,planner_name = planner_name,
         time_limit = time_limit, motion_range = motion_range,samples_per_batch=sample_per_batch)
-    goal_num = 100
+    goal_num = int(1000/mpi_size)
     success_num = 0
     inside = True
     delta_time = 0.0
@@ -127,7 +134,7 @@ def run():
     # result_string = "path num: %.2f, sucess num: %.2f total success time: %.4f"%(goal_num,success_num,delta_time)
     # with open('result_data/result_%s_shelf.txt'%planner_name,'a+') as f:
         # f.write(result_string+"\n")
-    save_result(res_notebook,"result_data/%s_shelf_%drank_%ds.pkl"%(planner_name,rank,int(time_limit)))
+    save_result(res_notebook,"result_data_shelf/%s_shelf_%drank_%ds.pkl"%(planner_name,rank,int(time_limit)))
     f.close()
 
 

@@ -177,7 +177,7 @@ def record_trajectory_randomObs(start,end,traj,aabb_list,fileId):
     start = list(numpy.around(numpy.array(start),5))
     traj =  (numpy.around(numpy.array(traj),5)).tolist()
     obs_aabb = list(aabb_list)
-    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/shelf/data_%d.txt'%fileId, 'a') as f:
+    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/tower/data_%d.txt'%fileId, 'a') as f:
         f.write("obtacles: "+str(obs_aabb)+"\n")
         f.write("start: "+str(start)+"\n")
         f.write("tajectories: "+str(traj)+"\n")
@@ -382,6 +382,12 @@ def read_NEXT_result(filename):
         total_sucess_time += (nums[3]*nums[1]*nums[0])
     # print path_num,success_num,total_sucess_time
     return path_num,success_num,total_sucess_time
+
+def add_table_AABB(aabb_list):
+    aabb_list = aabb_list.tolist()#add table pos
+    aabb_list.append([[0.5,-0.9,-0.1],[1.0,0.5,0.0]])
+    aabb_list = np.array(aabb_list)
+    return aabb_list
 
 if __name__ == "__main__":
     obs_list,init_array,goal_array = read_task_withObs("../dataset/tasks_dynamics.txt")
