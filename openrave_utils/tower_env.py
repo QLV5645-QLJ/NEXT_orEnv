@@ -151,7 +151,7 @@ class TowerEnv():
         #move to 0.15m above tower
         goal_pos[2] += 0.1
         arm_goal_pos = [goal_pos[0]+robot_pos[0],goal_pos[1]+robot_pos[1],goal_pos[2]+robot_pos[2]]
-        goal_config = self.ik_start(arm_goal_pos)
+        goal_config = self.ik_goal(arm_goal_pos)
         return goal_config
 
 
