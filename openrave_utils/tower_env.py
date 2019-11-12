@@ -168,8 +168,8 @@ class TowerEnv():
         # goal[1,0] = -1
         # goal[1,1] = 0
         # goal[2,2] = -1
-
         solution = self.robot.GetActiveManipulator().FindIKSolution(goal_transform,True)
+
         return solution
 
     def ik_goal(self,pos):
@@ -391,20 +391,28 @@ class TowerEnv():
         volumecolors = array(((1,0,0,0.5),(0,1,0,0.5),(0,0,1,0.5),(0,1,1,0.5),(1,0,1,0.5),(1,1,0,0.5),(0.5,1,0,0.5),(0.5,0,1,0.5),(0,0.5,1,0.5),(1,0.5,0,0.5),(0,1,0.5,0.5),(1,0,0.5,0.5)))
         side = 0.095
         box_size = [side,side,side]   
-        self.tower_boxes_num = np.random.choice(4,1)[0] + 1
+        # self.tower_boxes_num = np.random.choice(4,1)[0] + 1
+        self.tower_boxes_num = 10
         # self.tower_boxes_num = 4
        
-
-        x_limits = [0.4,0.8]
-        y_limits = [-0.2,0.2] 
-
         self.towers = []
         self.random_boxes = []
 
-        x_grid_num = int((x_limits[1]-x_limits[0])/0.1)  
+
+        #high towers near the robot
+        self.towers_near = []
+        x_limits = [0.40,0.50]
+        y_limits = [-0.20,0.0] 
+
+        x_grid_num = int(round((x_limits[1]-x_limits[0])/0.1))
+        # print('(x_limits[1]-x_limits[0])',(x_limits[1]-x_limits[0])) 
         y_grid_num = int((y_limits[1]-y_limits[0])/0.1)
         choice_num = x_grid_num * y_grid_num
-        tower_box_index_array = np.random.choice(choice_num,self.tower_boxes_num,replace=False)
+        # print('x_grid_num',x_grid_num)
+        # print('y_grid_num',y_grid_num)
+        # print('choice_num',choice_num)
+        # print('int(self.tower_boxes_num/2)',int(self.tower_boxes_num/2))
+        tower_box_index_array = np.random.choice(choice_num,2,replace=False)
 
         x_pos_index = int(tower_box_index_array[0]/y_grid_num)
         y_pos_index = tower_box_index_array[0] % y_grid_num
@@ -412,7 +420,7 @@ class TowerEnv():
         y_pos = y_limits[0] + y_pos_index * 0.1 + 0.05
         init_box_pos = [x_pos,y_pos,0.05]
        
-        for i in range(self.tower_boxes_num): 
+        for i in range(2): 
             x_pos_index = int(tower_box_index_array[i]/y_grid_num)
             y_pos_index = tower_box_index_array[i] % y_grid_num
             x_pos = x_limits[0] + x_pos_index * 0.1 + 0.05
@@ -420,9 +428,79 @@ class TowerEnv():
 
             grid_index = [x_pos_index,y_pos_index]
             tower_pos = [x_pos,y_pos,0.05] 
-            height = np.random.choice(4,1,replace=False) + 1
+            height = np.random.choice(4,1,replace=False) + 4
             tower = Tower(grid_index,tower_pos,height)
-            self.towers.append(tower)
+            self.towers_near.append(tower)
+
+        #high towers on the right side of the robot
+        self.towers_right = []
+        x_limits = [0.50,0.80]
+        y_limits = [-0.20,-0.10] 
+
+        x_grid_num = int(round((x_limits[1]-x_limits[0])/0.1))
+        # print('(x_limits[1]-x_limits[0])',(x_limits[1]-x_limits[0])) 
+        y_grid_num = int((y_limits[1]-y_limits[0])/0.1)
+        choice_num = x_grid_num * y_grid_num
+        # print('x_grid_num',x_grid_num)
+        # print('y_grid_num',y_grid_num)
+        # print('choice_num',choice_num)
+        # print('int(self.tower_boxes_num/2)',int(self.tower_boxes_num/2))
+        tower_box_index_array = np.random.choice(choice_num,3,replace=False)
+
+        x_pos_index = int(tower_box_index_array[0]/y_grid_num)
+        y_pos_index = tower_box_index_array[0] % y_grid_num
+        x_pos = x_limits[0] + x_pos_index * 0.1 + 0.05
+        y_pos = y_limits[0] + y_pos_index * 0.1 + 0.05
+        init_box_pos = [x_pos,y_pos,0.05]
+       
+        for i in range(3): 
+            x_pos_index = int(tower_box_index_array[i]/y_grid_num)
+            y_pos_index = tower_box_index_array[i] % y_grid_num
+            x_pos = x_limits[0] + x_pos_index * 0.1 + 0.05
+            y_pos = y_limits[0] + y_pos_index * 0.1 + 0.05
+
+            grid_index = [x_pos_index,y_pos_index]
+            tower_pos = [x_pos,y_pos,0.05] 
+            height = np.random.choice(4,1,replace=False) + 4
+            tower = Tower(grid_index,tower_pos,height)
+            self.towers_right.append(tower)
+
+
+
+        #lower towers far from the robot
+        self.towers_far = []
+        x_limits = [0.6,0.8]
+        y_limits = [-0.2,0.2] 
+
+        x_grid_num = int(round((x_limits[1]-x_limits[0])/0.1))  
+        y_grid_num = int((y_limits[1]-y_limits[0])/0.1)
+        choice_num = x_grid_num * y_grid_num
+        tower_box_index_array = np.random.choice(choice_num,int(self.tower_boxes_num/2),replace=False)
+
+        x_pos_index = int(tower_box_index_array[0]/y_grid_num)
+        y_pos_index = tower_box_index_array[0] % y_grid_num
+        x_pos = x_limits[0] + x_pos_index * 0.1 + 0.05
+        y_pos = y_limits[0] + y_pos_index * 0.1 + 0.05
+        init_box_pos = [x_pos,y_pos,0.05]
+       
+        for i in range(self.tower_boxes_num/2): 
+            x_pos_index = int(tower_box_index_array[i]/y_grid_num)
+            y_pos_index = tower_box_index_array[i] % y_grid_num
+            x_pos = x_limits[0] + x_pos_index * 0.1 + 0.05
+            y_pos = y_limits[0] + y_pos_index * 0.1 + 0.05
+
+            grid_index = [x_pos_index,y_pos_index]
+            tower_pos = [x_pos,y_pos,0.05] 
+            height = np.random.choice(2,1,replace=False) + 1
+            tower = Tower(grid_index,tower_pos,height)
+            self.towers_far.append(tower)
+
+        #merge self.towers_far self.towers_near self.towers_right
+        self.towers_far.extend(self.towers_near)
+        self.towers_far.extend(self.towers_right)
+        self.towers = copy.deepcopy(self.towers_far)
+
+
 
         #create boxes on the table
         # boxes_num = 2
@@ -505,6 +583,19 @@ class TowerEnv():
         # positions.append([0.7,0.2,0.0])
         return positions,shapes
 
+    def create_board(self,robot_pos=None):
+        shapes = []
+        positions = []
+        vertical_shape = [0.6,0.1,0.9]
+        v_pos1 = [0.7,-0.75,0.45]
+        v_pos2 = [0.7,0.45,0.45]
+        horizonal_shape = [0.6,1.2,0.1]
+        h_pos1 = [0.7,-0.2,0.85]
+        shapes = [vertical_shape,vertical_shape,horizonal_shape]
+        positions = [v_pos1,v_pos2,h_pos1]
+        # shapes.append([0.8,0.1,2.0])
+        # positions.append([0.7,0.2,0.0])
+        return positions,shapes
 
     def navigation(self,pos):
         #pos = [x,y,direction]

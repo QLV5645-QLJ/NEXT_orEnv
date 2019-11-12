@@ -44,6 +44,8 @@ def load_test(planner_name,dirname="result_data_shelf/"):
 	import glob
 	# planner_name = "OMPL_RRTstar"
 	time_limits = [5,10,15,20,25,30,35,40,45,50]
+	success_rates = []
+	average_lengths = []
 	for time_limit in time_limits:
 		task_num = 0
 		success_num = 0
@@ -66,5 +68,10 @@ def load_test(planner_name,dirname="result_data_shelf/"):
 			success_num += result.success_count
 		success_rate = success_num*1.0/task_num*1.0
 		average_path_length= total_path_length/task_num*1.0
+		success_rates.append(success_rate)
+		average_lengths.append(average_path_length)
 		print("planner: %s, time limit = %d, success rate = %f, average path cost = %f"%(
 			planner_name,time_limit,success_rate,average_path_length))
+	print("success rates:",success_rates)
+	print("average lengthL",average_lengths)
+	return success_rates,average_lengths

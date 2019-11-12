@@ -177,7 +177,7 @@ def record_trajectory_randomObs(start,end,traj,aabb_list,fileId):
     start = list(numpy.around(numpy.array(start),5))
     traj =  (numpy.around(numpy.array(traj),5)).tolist()
     obs_aabb = list(aabb_list)
-    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/tower/data_%d.txt'%fileId, 'a') as f:
+    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/stacking/data_%d.txt'%fileId, 'a') as f:
         f.write("obtacles: "+str(obs_aabb)+"\n")
         f.write("start: "+str(start)+"\n")
         f.write("tajectories: "+str(traj)+"\n")
@@ -189,10 +189,10 @@ def collect_files():
     from os import path
     fileids = range(300)
     num_data = 0
-    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/data_shelf.txt', 'a+') as wf:
+    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/data_tower.txt', 'a+') as wf:
         for id in fileids:
-            if(path.exists('/root/catkin_ws/NEXT_ws/simulation/dataset/shelf/data_%d.txt'%id)):
-                with open('/root/catkin_ws/NEXT_ws/simulation/dataset/shelf/data_%d.txt'%id, 'r') as rf:
+            if(path.exists('/root/catkin_ws/NEXT_ws/simulation/dataset/tower/data_%d.txt'%id)):
+                with open('/root/catkin_ws/NEXT_ws/simulation/dataset/tower/data_%d.txt'%id, 'r') as rf:
                     # trajs = rf.readlines()
                     trajs = rf.read()
                     # print(trajs)
@@ -385,7 +385,7 @@ def read_NEXT_result(filename):
 
 def add_table_AABB(aabb_list):
     aabb_list = aabb_list.tolist()#add table pos
-    aabb_list.append([[0.5,-0.9,-0.1],[1.0,0.5,0.0]])
+    aabb_list.append([[0.5,-0.8,-0.1],[1.0,0.5,0.0]])
     aabb_list = np.array(aabb_list)
     return aabb_list
 

@@ -65,7 +65,7 @@ def create_exp2(env):
 		print("creating box",temp_obb)
 		# time.sleep(5)
 
-def create_boxes(env,pos_list,size_list,robot_pos,draw=False):
+def create_boxes(env,pos_list,size_list,robot_pos,draw=False,no_color=0):
 	"""
 	create multiple box on env
 	pos_list: [[x,y,z]],relative position to robot position
@@ -94,7 +94,10 @@ def create_boxes(env,pos_list,size_list,robot_pos,draw=False):
 	if(draw):
 		volumecolors = np.array(((1,0,0,0.5),(0,1,0,0.5),(0,0,1,0.5),(0,1,1,0.5),(1,0,1,0.5),(1,1,0,0.5),(0.5,1,0,0.5),(0.5,0,1,0.5),(0,0.5,1,0.5),(1,0.5,0,0.5),(0,1,0.5,0.5),(1,0,0.5,0.5)))
 		num = volumecolors.shape[0]
+		num_body = len(body_list)
 		for body_id,body in enumerate(body_list):
+			if(body_id>=(num_body-no_color)):
+				break
 			for ig,g in enumerate(body.GetLinks()[0].GetGeometries()):
 				g.SetDiffuseColor(volumecolors[body_id%num])
 	return body_list,aabb_array

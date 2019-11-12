@@ -1,6 +1,6 @@
 from generate_utils.task_generation_shelf import *
 import generate_utils.task_generation_dynamics as task_generation_dynamics
-from openrave_utils.funcs import read_result
+from openrave_utils.funcs import read_result,collect_files
 from openrave_utils.result_notebook import load_test
 import openrave_utils.test_base as base_pr
 import openrave_utils.test_grasp as grasp_pr
@@ -17,7 +17,8 @@ def print_result():
 	print("%s: success_rate = %f , average_time = %f"%(planner_name, success_num/path_num,total_sucess_time/success_num))
 
 
-# load_test("OMPL_RRTstar")
-# load_test("OMPL_BITstar")
+load_test("OMPL_RRTstar")
+load_test("OMPL_BITstar")
 # grasp_pr.run()
-base_pr.run()
+# base_pr.run()
+# collect_files()
