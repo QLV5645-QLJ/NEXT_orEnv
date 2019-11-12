@@ -29,7 +29,7 @@ def run():
 	"Main example code."
 	# load a scene from ProjectRoom environment XML file
 	env = Environment()
-	# env.SetViewer('qtcoin')
+	env.SetViewer('qtcoin')
 	robot_pos = [2.6, -1.3, 0.8]#the origin of the world but not actual robot pos
 	env.Load(os.getcwd()+'/worlds/exp5.env.xml')
 	# body_list,aabb_list = create_boxes(env=env,pos_list=positions,size_list=shapes,robot_pos=robot_pos)
@@ -44,10 +44,10 @@ def run():
 
 
 	#load scene
-	tower_env = TowerEnv(robot=robot)
-	box_positions,box_shapes = tower_env.create_scenario_tower_on_shelf()
-	board_positions,board_shapes = tower_env.create_shelf()
-	positions,shapes = box_positions+board_positions,box_shapes+board_shapes
+	tower_env = TowerEnv(robot=robot,env=env)
+	box_positions,box_shapes = tower_env.create_scenario_checkerboard()
+	# board_positions,board_shapes = tower_env.create_shelf()
+	positions,shapes = box_positions,box_shapes
 	body_list,aabb_list = create_boxes(env=env,pos_list=positions,size_list=shapes,robot_pos=robot_pos)
 
     #find available solution and execute solution 3.5,-1.2,1.0
@@ -63,7 +63,7 @@ def run():
     
 
     #use palner to plan path
-	time_limit = 50.0
+	time_limit = 5.0
 	motion_range = 20.0
 	sample_per_batch = 100.0
 	orplanner = ORPLANNER(robot=robot,env=env,planner_name = "OMPL_BITstar",
@@ -80,23 +80,17 @@ def run():
 		print("total plan time:",delta_time)
 		if(success_num>100):
 		    break
-		box_positions,box_shapes = tower_env.create_scenario_tower_on_shelf()
-		board_positions,board_shapes = tower_env.create_shelf()
-		positions,shapes = box_positions+board_positions,box_shapes+board_shapes
-		print("before recreate")
-		aabb_list = Recreate_boxes(env=env,pos_list=positions,size_list=shapes,body_list=body_list,
-			robot_pos=robot_pos)
+		positions,shapes = tower_env.create_scenario_checkerboard()
+		print("before recreate",len(positions))
+		for body in body_list:
+			env.Remove(body)
+		body_list,aabb_list = create_boxes(env=env,pos_list=positions,size_list=shapes,robot_pos=robot_pos,draw=True)
 		aabb_list = add_table_AABB(aabb_list)
-		print(aabb_list.tolist())
+		# print(aabb_list.tolist())
 		#add color
-		volumecolors = array(((1,0,0,0.5),(0,1,0,0.5),(0,0,1,0.5),(0,1,1,0.5),(1,0,1,0.5),(1,1,0,0.5),(0.5,1,0,0.5),(0.5,0,1,0.5),(0,0.5,1,0.5),(1,0.5,0,0.5),(0,1,0.5,0.5),(1,0,0.5,0.5)))
-		for body_id,body in enumerate(body_list):
-			if(body_id>4):
-				break
-			for ig,g in enumerate(body.GetLinks()[0].GetGeometries()):
-				g.SetDiffuseColor(volumecolors[body_id])
 		time.sleep(0.5)
 
+		raw_input("...")
 		#move to outside and then generate goal
 		goal_config = None
 		start_config = None
@@ -128,8 +122,8 @@ def run():
 
 		# raw_input("...")
 
-		record_trajectory_randomObs(start=start_config,end=goal_config,
-			traj=interpolated_traj,fileId=rank,aabb_list = (aabb_list).tolist())
+		# record_trajectory_randomObs(start=start_config,end=goal_config,
+			# traj=interpolated_traj,fileId=rank,aabb_list = (aabb_list).tolist())
 		
 		#grab object
 		taskmanip.CloseFingers()

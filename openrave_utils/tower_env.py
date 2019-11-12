@@ -369,13 +369,13 @@ class TowerEnv():
         box_size = [side,side,side]   
         self.tower_boxes_num = np.random.choice(4,1)[0] + 1
         # self.tower_boxes_num = 4
-        self.random_boxes_num = self.boxes_total_num - self.tower_boxes_num        
+       
 
         x_limits = [0.4,0.8]
         y_limits = [-0.2,0.2] 
 
-        self.tower_pos_list = []
-        self.tower_size_list = []
+        self.towers = []
+        self.random_boxes = []
 
         x_grid_num = int((x_limits[1]-x_limits[0])/0.1)  
         y_grid_num = int((y_limits[1]-y_limits[0])/0.1)
@@ -400,13 +400,6 @@ class TowerEnv():
             tower = Tower(grid_index,tower_pos,height)
             self.towers.append(tower)
 
-            # box_pos = copy.deepcopy(init_box_pos)
-            # box_pos[2] += 0.1 * i
-            # self.tower_pos_list.append(box_pos)
-            # new_box_size = copy.deepcopy(box_size)
-            # self.tower_size_list.append(new_box_size)  
-
-
         #create boxes on the table
         # boxes_num = 2
         self.random_boxes_pos_list = []
@@ -416,7 +409,7 @@ class TowerEnv():
 
         #on table
 
-        self.random_boxes_num = 4        
+        self.random_boxes_num = np.random.choice(4,1)[0] + 1      
         random_box_x_limits = [0.4,0.8]
         random_box_y_limits = [-0.6,-0.2]
 
@@ -435,14 +428,8 @@ class TowerEnv():
             grid_index = [x_pos_index,y_pos_index]
             random_box_pos = [x_pos,y_pos,0.05]
             height = 1
-            random_box = Tower(grid_index,tower_pos,height)
+            random_box = Tower(grid_index,random_box_pos,height)
             self.random_boxes.append(random_box)
-
-            # self.random_boxes_pos_list.append(random_box_pos)
-            # new_box_size = copy.deepcopy(box_size)
-            # self.random_boxes_size_list.append(new_box_size)
-
-
 
         #got self.towers and self.random_boxes including all the towers, generate box list
         self.box_positions = []
