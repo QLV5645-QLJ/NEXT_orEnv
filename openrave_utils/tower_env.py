@@ -24,12 +24,22 @@ except:
     def cpu_count(): return 1
 
 
+class Tower():
+    def __init__(self,grid_index,position,height):
+        #the x,y index on checkerboard
+        self.grid_index = grid_index
+        #position = [x,y,z]
+        self.position = position
+        #number of boxes constructing a tower
+        self.height = height
+
 class TowerEnv():
-    def __init__(self,robot):
+    def __init__(self,robot,env):
+        self.env = env
         self.robot = robot
-        #3 box tower
-        self.tower = []
-        #random boxes on table
+        #box tower element is class tower with different height 
+        self.towers = []
+        #random boxes on table class tower with height one
         self.random_boxes = []
         self.boxes_total_num = 5
         self.tower_boxes_num = 3
@@ -349,7 +359,121 @@ class TowerEnv():
 
         return self.box_positions, self.box_shapes
 
+    def create_scenario_checkerboard(self):
+        """
+            Return:[box1,box2,...],box=[pos + size]
+        """
+        self.center_board_z = 0.25
+        volumecolors = array(((1,0,0,0.5),(0,1,0,0.5),(0,0,1,0.5),(0,1,1,0.5),(1,0,1,0.5),(1,1,0,0.5),(0.5,1,0,0.5),(0.5,0,1,0.5),(0,0.5,1,0.5),(1,0.5,0,0.5),(0,1,0.5,0.5),(1,0,0.5,0.5)))
+        side = 0.095
+        box_size = [side,side,side]   
+        self.tower_boxes_num = np.random.choice(4,1)[0] + 1
+        # self.tower_boxes_num = 4
+        self.random_boxes_num = self.boxes_total_num - self.tower_boxes_num        
 
+        x_limits = [0.4,0.8]
+        y_limits = [-0.2,0.2] 
+
+        self.tower_pos_list = []
+        self.tower_size_list = []
+
+        x_grid_num = int((x_limits[1]-x_limits[0])/0.1)  
+        y_grid_num = int((y_limits[1]-y_limits[0])/0.1)
+        choice_num = x_grid_num * y_grid_num
+        tower_box_index_array = np.random.choice(choice_num,self.tower_boxes_num,replace=False)
+
+        x_pos_index = int(tower_box_index_array[0]/y_grid_num)
+        y_pos_index = tower_box_index_array[0] % y_grid_num
+        x_pos = x_limits[0] + x_pos_index * 0.1 + 0.05
+        y_pos = y_limits[0] + y_pos_index * 0.1 + 0.05
+        init_box_pos = [x_pos,y_pos,0.05]
+       
+        for i in range(self.tower_boxes_num): 
+            x_pos_index = int(tower_box_index_array[i]/y_grid_num)
+            y_pos_index = tower_box_index_array[i] % y_grid_num
+            x_pos = x_limits[0] + x_pos_index * 0.1 + 0.05
+            y_pos = y_limits[0] + y_pos_index * 0.1 + 0.05
+
+            grid_index = [x_pos_index,y_pos_index]
+            tower_pos = [x_pos,y_pos,0.05] 
+            height = np.random.choice(4,1,replace=False) + 1
+            tower = Tower(grid_index,tower_pos,height)
+            self.towers.append(tower)
+
+            # box_pos = copy.deepcopy(init_box_pos)
+            # box_pos[2] += 0.1 * i
+            # self.tower_pos_list.append(box_pos)
+            # new_box_size = copy.deepcopy(box_size)
+            # self.tower_size_list.append(new_box_size)  
+
+
+        #create boxes on the table
+        # boxes_num = 2
+        self.random_boxes_pos_list = []
+        self.random_boxes_size_list = []
+
+        #4*4 space remained for start random box
+
+        #on table
+
+        self.random_boxes_num = 4        
+        random_box_x_limits = [0.4,0.8]
+        random_box_y_limits = [-0.6,-0.2]
+
+        x_grid_num = int((x_limits[1]-x_limits[0])/0.1)  
+        y_grid_num = int((y_limits[1]-y_limits[0])/0.1)
+        choice_num = x_grid_num * y_grid_num
+
+        random_box_index_array = np.random.choice(choice_num,self.random_boxes_num,replace=False)
+
+        for i in range(self.random_boxes_num):
+            x_pos_index = int(random_box_index_array[i]/y_grid_num)
+            y_pos_index = random_box_index_array[i] % y_grid_num
+            x_pos = random_box_x_limits[0] + x_pos_index * 0.1 + 0.05
+            y_pos = random_box_y_limits[0] + y_pos_index * 0.1 + 0.05
+
+            grid_index = [x_pos_index,y_pos_index]
+            random_box_pos = [x_pos,y_pos,0.05]
+            height = 1
+            random_box = Tower(grid_index,tower_pos,height)
+            self.random_boxes.append(random_box)
+
+            # self.random_boxes_pos_list.append(random_box_pos)
+            # new_box_size = copy.deepcopy(box_size)
+            # self.random_boxes_size_list.append(new_box_size)
+
+
+
+        #got self.towers and self.random_boxes including all the towers, generate box list
+        self.box_positions = []
+        self.box_shapes = []
+
+        for tower in self.towers:
+            base_pos = tower.position
+            for i in range(tower.height):
+                pos = copy.deepcopy(base_pos)
+                new_box_size = copy.deepcopy(box_size)
+                pos[2] += i * 0.1
+                self.box_positions.append(pos)
+                self.box_shapes.append(new_box_size)
+
+
+        for box in self.random_boxes:
+            box_pos = box.position
+            pos = copy.deepcopy(box_pos)
+            new_box_size = copy.deepcopy(box_size)
+            self.box_positions.append(pos)
+            self.box_shapes.append(new_box_size)
+
+            
+        # self.box_positions.extend(self.tower_pos_list)
+        # self.box_positions.extend(self.random_boxes_pos_list)
+
+
+        # self.box_shapes.extend(self.tower_size_list)
+        # self.box_shapes.extend(self.random_boxes_size_list)
+
+        return self.box_positions, self.box_shapes
 
 
 
@@ -369,6 +493,47 @@ class TowerEnv():
         # positions.append([0.7,0.2,0.0])
         return positions,shapes
 
+
+    def navigation(self,pos):
+        #pos = [x,y,direction]
+        self.basemanip = interfaces.BaseManipulation(self.robot)
+        # find the boundaries of the environment
+        with self.env:
+            envmin = []
+            envmax = []
+            for b in self.env.GetBodies():
+                ab = b.ComputeAABB()
+                envmin.append(ab.pos()-ab.extents())
+                envmax.append(ab.pos()+ab.extents())
+            abrobot = self.robot.ComputeAABB()
+            envmin = numpy.min(array(envmin),0)+abrobot.extents()
+            envmax = numpy.max(array(envmax),0)-abrobot.extents()
+        bounds = array(((envmin[0],envmin[1],-pi),(envmax[0],envmax[1],pi)))
+        with self.env:
+            self.robot.SetAffineTranslationLimits(envmin,envmax)
+            self.robot.SetAffineTranslationMaxVels([0.5,0.5,0.5])
+            self.robot.SetAffineRotationAxisMaxVels(ones(4))
+            self.robot.SetActiveDOFs([],DOFAffine.X|DOFAffine.Y|DOFAffine.RotationAxis,[0,0,1])
+            # pick a random position
+            # with self.robot:
+            #     while True:
+            #         # goal = bounds[0,:]+np.random.rand(3)*(bounds[1,:]-bounds[0,:])
+            #         goal = np.array([2.6,-1.3,3.14])
+            #         self.robot.SetActiveDOFValues(goal)
+            #         if not self.env.CheckCollision(self.robot):
+                        # break
+
+        # goal = np.array([2.3,-1.2,np.pi*0.5])  
+        goal = pos                          
+        print 'planning to: ',goal  
+        self.basemanip.MoveActiveJoints(goal=goal,maxiter=3000,steplength=0.1)
+        # if self.basemanip.MoveActiveJoints(goal=goal,maxiter=3000,steplength=0.1) is None:
+        #     print 'retrying...'
+        #     continue
+        print 'waiting for controller'
+        self.robot.WaitForController(0) 
+        print('the goal is',goal)
+        # raw_input('another goal?') 
 
 def run():
     env = Environment()
