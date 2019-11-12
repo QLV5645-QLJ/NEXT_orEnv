@@ -131,6 +131,30 @@ class TowerEnv():
         goal_config = self.ik_start(arm_goal_pos)
         return goal_config
 
+    def generate_start_config_checkerboard(self,robot_pos=None):
+        #self.random_boxes
+        start_pos = copy.deepcopy(self.random_boxes[0].position)
+        #move to 0.05m above box
+        # start_pos[2] += 0.05
+        arm_start_pos = [start_pos[0]+robot_pos[0],start_pos[1]+robot_pos[1],start_pos[2]+robot_pos[2]]
+        start_config = self.ik_goal(arm_start_pos)
+
+        start_box_index = self.first_random_box_index
+        return start_box_index, start_config
+
+    def generate_goal_config_checkerboard(self,robot_pos=None):
+        #self.towers
+        first_tower = self.towers[0]
+        goal_pos = copy.deepcopy(first_tower.position)
+        goal_pos[2] += 0.1 * (first_tower.height - 1)
+
+        #move to 0.15m above tower
+        goal_pos[2] += 0.1
+        arm_goal_pos = [goal_pos[0]+robot_pos[0],goal_pos[1]+robot_pos[1],goal_pos[2]+robot_pos[2]]
+        goal_config = self.ik_start(arm_goal_pos)
+        return goal_config
+
+
     def ik_start(self,pos):
         goal = eye(4,dtype=float)
         goal[0,3] = pos[0]
@@ -444,6 +468,7 @@ class TowerEnv():
                 self.box_positions.append(pos)
                 self.box_shapes.append(new_box_size)
 
+        self.first_random_box_index = len(self.box_positions)
 
         for box in self.random_boxes:
             box_pos = box.position
