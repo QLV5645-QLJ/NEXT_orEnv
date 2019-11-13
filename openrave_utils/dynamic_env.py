@@ -65,7 +65,7 @@ def create_exp2(env):
 		print("creating box",temp_obb)
 		# time.sleep(5)
 
-def create_boxes(env,pos_list,size_list,robot_pos,draw=False,no_color=0):
+def create_boxes(env,pos_list,size_list,robot_pos,draw=False,no_color=0,smaller_box=False):
 	"""
 	create multiple box on env
 	pos_list: [[x,y,z]],relative position to robot position
@@ -77,6 +77,12 @@ def create_boxes(env,pos_list,size_list,robot_pos,draw=False,no_color=0):
 	"""
 	body_list = []
 	aabb_list = []#[[[0.6,-0.4,-0.2],[1.0,0.6,-0.3]]]#table aabb
+	if(smaller_box):
+		for i in range(len(size_list)-3):
+			size_list[i][0] = size_list[i][0]-0.005
+			size_list[i][1] = size_list[i][1]-0.005
+			size_list[i][2] = size_list[i][2]-0.005
+	# print(size_list)
 	for i in range(len(pos_list)):
 		transformed_aabb = transform_relativeAABB(relative_position=pos_list[i],size=size_list[i])
 		[world_box_x,world_box_y,world_box_z] = transform_pos(original_position=robot_pos,

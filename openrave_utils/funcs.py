@@ -177,7 +177,7 @@ def record_trajectory_randomObs(start,end,traj,aabb_list,fileId):
     start = list(numpy.around(numpy.array(start),5))
     traj =  (numpy.around(numpy.array(traj),5)).tolist()
     obs_aabb = list(aabb_list)
-    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/stacking/data_%d.txt'%fileId, 'a') as f:
+    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/stacking_tasks/data_%d.txt'%fileId, 'a') as f:
         f.write("obtacles: "+str(obs_aabb)+"\n")
         f.write("start: "+str(start)+"\n")
         f.write("tajectories: "+str(traj)+"\n")
@@ -187,19 +187,19 @@ def record_trajectory_randomObs(start,end,traj,aabb_list,fileId):
 
 def collect_files():
     from os import path
-    fileids = range(300)
+    fileids = range(30)
     num_data = 0
-    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/data_tower.txt', 'a+') as wf:
+    with open('/root/catkin_ws/NEXT_ws/simulation/dataset/tasks_stacking.txt', 'a+') as wf:
         for id in fileids:
-            if(path.exists('/root/catkin_ws/NEXT_ws/simulation/dataset/tower/data_%d.txt'%id)):
-                with open('/root/catkin_ws/NEXT_ws/simulation/dataset/tower/data_%d.txt'%id, 'r') as rf:
+            if(path.exists('/root/catkin_ws/NEXT_ws/simulation/dataset/stacking_tasks/data_%d.txt'%id)):
+                with open('/root/catkin_ws/NEXT_ws/simulation/dataset/stacking_tasks/data_%d.txt'%id, 'r') as rf:
                     # trajs = rf.readlines()
                     trajs = rf.read()
                     # print(trajs)
                     wf.write(trajs)
-                    # num_data += len(trajs)/4
+                    # num_data += len(trajs)/3
                     # print(len(trajs)/4)
-    # print("num data:",num_data)
+    print("num data:",num_data)
     return 
 
 def interpolate(from_state, to_state, ratio):

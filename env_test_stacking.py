@@ -17,6 +17,7 @@ from openravepy.misc import OpenRAVEGlobalArguments
 from openrave_utils.shelf_obb import *
 from openrave_utils.dynamic_env import *
 from openrave_utils.result_notebook import resultNotebook,save_result
+from openrave_utils.tower_env import TowerEnv
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--time_limit', type=float, default=5)
@@ -30,7 +31,7 @@ def waitrobot(robot):
 
 def run():
     env = Environment()
-    # env.SetViewer('qtcoin')
+    env.SetViewer('qtcoin')
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     mpi_size = comm.Get_size()
@@ -38,28 +39,27 @@ def run():
     print("rank:",rank,"size: ",mpi_size)
 
     "Main example code."
-    # load a scene from ProjectRoom environment XML file
-    shelf_obb = ShelfObb()
-    frame_shapes,frame_positions =shelf_obb.generate_frames()
-    board_shapes,board_positions = shelf_obb.generate_borad_obb()
-    shapes = frame_shapes + board_shapes
-    positions = frame_positions + board_positions
-
-    # archs_shapes,archs_positions,archs_start,archs_goal = generator.generate()
-    robot_pos = [2.6, -1.3, 1.0]
-    env.Load(os.getcwd()+'/worlds/exp4.env.xml')
-    body_list,aabb_list = create_boxes(env=env,pos_list=positions,size_list=shapes,
-        robot_pos=robot_pos)
+    robot_pos = [2.6, -1.3, 0.8]#the origin of the world but not actual robot pos
+    env.Load(os.getcwd()+'/worlds/exp5.env.xml')
 
     #get robot info
     robot = env.GetRobots()[0]
     manipulator = robot.GetManipulator('arm')
     robot.SetActiveManipulator(manipulator)
+    taskmanip = interfaces.TaskManipulation(robot)
+
+    #load scene
+    tower_env = TowerEnv(robot=robot,env=env)
+    box_positions,box_shapes = tower_env.create_scenario_checkerboard()
+    # board_positions,board_shapes = tower_env.create_shelf()
+    positions,shapes = box_positions,box_shapes
+    body_list,aabb_list = create_boxes(env=env,pos_list=positions,size_list=shapes,robot_pos=robot_pos)
+    time.sleep(0.1)
 
     #get task from dataset
     init_states = None
     goal_states = None
-    obs_list,init_array,goal_array = read_task_withObs("dataset/tasks_shelf.txt")
+    obs_list,init_array,goal_array = read_task_withObs("dataset/tasks_stacking.txt")
     init_states = np.copy(init_array)
     goal_states = np.copy(goal_array)
 
@@ -67,10 +67,10 @@ def run():
     time_limit = args.time_limit#5.0
     motion_range = 20.0
     sample_per_batch = 100.0
-    planner_name = "OMPL_RRTstar"
+    planner_name = "OMPL_BITstar"
     orplanner = ORPLANNER(robot=robot,env=env,planner_name = planner_name,
         time_limit = time_limit, motion_range = motion_range,samples_per_batch=sample_per_batch)
-    goal_num = int(1000/mpi_size)
+    goal_num = 5#int(1000/mpi_size)
     success_num = 0
     inside = True
     delta_time = 0.0
@@ -85,24 +85,25 @@ def run():
         state_id = i + rank*goal_num
         #load scene
         obs_aabbs = list(obs_list[state_id])
-        shapes,positions = transform_obb(obs_aabbs)
-        aabb_list = Recreate_boxes(env=env,pos_list=positions,size_list=shapes,
-            body_list=body_list,robot_pos=robot_pos)
+        shapes,positions = transform_obb(obs_aabbs[0:-1])
+        for body in body_list:
+            env.Remove(body)
+        body_list,aabb_list = create_boxes(env=env,pos_list=positions,size_list=shapes,
+            robot_pos=robot_pos,draw=True,no_color=3,smaller_box=True)
+        time.sleep(0.1)
 
         #move to outside and then generate goal
         start_config = None
         start_config = np.copy(init_states[state_id,:])
         execute_activeDOFValues(solution=start_config,robot=robot,env=env)      
         time.sleep(0.1)
+        if(env.CheckCollision(robot)):
+            print("!!!start colliion!!!")
         goal_config = None
         goal_config = np.copy(goal_states[state_id,:])
         if(goal_config is None):
             print("No goal IK solution")
             continue
-
-        # print("rank id",rank)
-        # print("start config",start_config)
-        # print("goal config",goal_config)
 
         #generate trajectory
         orplanner.set_goal(goal_config)
@@ -114,28 +115,25 @@ def run():
             print("no trajectory solution")
             continue
         else:
-            # print interpolated_traj
-            # path_array = getData_trajec
+            print("saving data")
             res_notebook.append(success=True,init_state=start_config,goal_state=goal_config,
                 path_array=np.array(interpolated_traj))
 
-
-        #record trjectory if available
-        # record_trajectory_withobs(start=start_config,end=goal_config,
-            # traj=interpolated_traj,fileId=rank)
-
+        #grab object
+        taskmanip.CloseFingers()
+        time.sleep(2)
+        robot.Grab(body_list[0])
         # Execute the trajectory.
         robot.GetController().SetPath(traj)
         robot.WaitForController(0)
-        time.sleep(0.1)
+        time.sleep(0.5)
+        #release grab
+        taskmanip.ReleaseFingers(target=body_list[0])
+        time.sleep(1)
 
         success_num+=1
         delta_time += (end_time-start_time)
-    # result_string = "path num: %.2f, sucess num: %.2f total success time: %.4f"%(goal_num,success_num,delta_time)
-    # with open('result_data/result_%s_shelf.txt'%planner_name,'a+') as f:
-        # f.write(result_string+"\n")
-    save_result(res_notebook,"result_data_shelf/%s_shelf_%drank_%ds.pkl"%(planner_name,rank,int(time_limit)))
-    # f.close()
+    save_result(res_notebook,"result_data_stacking/%s_shelf_%drank_%ds.pkl"%(planner_name,rank,int(time_limit)))
 
 
 

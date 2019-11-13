@@ -537,6 +537,16 @@ class TowerEnv():
         self.box_positions = []
         self.box_shapes = []
 
+
+        for box in self.random_boxes:
+            box_pos = box.position
+            pos = copy.deepcopy(box_pos)
+            new_box_size = copy.deepcopy(box_size)
+            self.box_positions.append(pos)
+            self.box_shapes.append(new_box_size)
+
+        self.first_random_box_index = 0#len(self.box_positions)
+        
         for tower in self.towers:
             base_pos = tower.position
             for i in range(tower.height):
@@ -546,14 +556,6 @@ class TowerEnv():
                 self.box_positions.append(pos)
                 self.box_shapes.append(new_box_size)
 
-        self.first_random_box_index = len(self.box_positions)
-
-        for box in self.random_boxes:
-            box_pos = box.position
-            pos = copy.deepcopy(box_pos)
-            new_box_size = copy.deepcopy(box_size)
-            self.box_positions.append(pos)
-            self.box_shapes.append(new_box_size)
 
             
         # self.box_positions.extend(self.tower_pos_list)
