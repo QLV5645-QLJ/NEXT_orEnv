@@ -31,7 +31,7 @@ def waitrobot(robot):
 
 def run():
     env = Environment()
-    env.SetViewer('qtcoin')
+    # env.SetViewer('qtcoin')
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     mpi_size = comm.Get_size()
@@ -70,11 +70,12 @@ def run():
     planner_name = "OMPL_BITstar"
     orplanner = ORPLANNER(robot=robot,env=env,planner_name = planner_name,
         time_limit = time_limit, motion_range = motion_range,samples_per_batch=sample_per_batch)
-    goal_num = 5#int(1000/mpi_size)
+    goal_num = int(1000/mpi_size)
     success_num = 0
     inside = True
     delta_time = 0.0
 
+    # raw_input("...")
     res_notebook = resultNotebook()
     for i in range(goal_num):
         print("time_limit: %f motion_range:%f sample_per_batch:%f "%(time_limit,motion_range,sample_per_batch))
