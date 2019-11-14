@@ -67,7 +67,7 @@ def run():
     time_limit = args.time_limit#5.0
     motion_range = 20.0
     sample_per_batch = 100.0
-    planner_name = "OMPL_BITstar"
+    planner_name = "OMPL_RRTstar"
     orplanner = ORPLANNER(robot=robot,env=env,planner_name = planner_name,
         time_limit = time_limit, motion_range = motion_range,samples_per_batch=sample_per_batch)
     goal_num = int(1000/mpi_size)

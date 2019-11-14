@@ -89,6 +89,9 @@ def run():
 			print("No goal IK solution")
 			continue
 
+		raw_input("...")
+		continue
+
 		#generate trajectory
 		orplanner.set_goal(goal_config)
 		start_time = time.time()
@@ -98,8 +101,8 @@ def run():
 			print("no trajectory solution")
 			continue
 
-		record_trajectory_randomObs(start=start_config,end=goal_config,
-			traj=interpolated_traj,fileId=rank,aabb_list = (aabb_list).tolist())
+		# record_trajectory_randomObs(start=start_config,end=goal_config,
+		# 	traj=interpolated_traj,fileId=rank,aabb_list = (aabb_list).tolist())
 		# Execute the trajectory.
 		robot.GetController().SetPath(traj)
 		robot.WaitForController(0)

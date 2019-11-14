@@ -389,6 +389,24 @@ def add_table_AABB(aabb_list):
     aabb_list = np.array(aabb_list)
     return aabb_list
 
+def conver_traj_to_task(filename="dataset/data_stacking.txt"):
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    num_task = len(lines)/4
+    tasks_str = []
+    for i in range(num_task):
+        tasks_str.append(lines[4*i])
+        tasks_str.append(lines[4*i+1])
+        tasks_str.append(lines[4*i+3])
+    with open("dataset/tasks_train_stacking.txt",'a+') as wf:
+        for task in tasks_str:
+            wf.write(task)
+    f.close()
+    wf.close()
+
+
+
+
 if __name__ == "__main__":
     obs_list,init_array,goal_array = read_task_withObs("../dataset/tasks_dynamics.txt")
     print obs_list[5]

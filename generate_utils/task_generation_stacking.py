@@ -41,12 +41,13 @@ def run():
 	"Main example code."
 	# load a scene from ProjectRoom environment XML file
 	env = Environment()
-	# env.SetViewer('qtcoin')
+	env.SetViewer('qtcoin')
 	robot_pos = [2.6, -1.3, 0.8]#the origin of the world but not actual robot pos
 	env.Load(os.getcwd()+'/worlds/exp5.env.xml')
 	# body_list,aabb_list = create_boxes(env=env,pos_list=positions,size_list=shapes,robot_pos=robot_pos)
 	# print(str(aabb_list.tolist()))
 	time.sleep(1)
+	# print env.CollisionAction
 
 	#get robot info
 	robot = env.GetRobots()[0]
@@ -119,8 +120,8 @@ def run():
 		print("total plan time:",delta_time)
 		path_num+=1
 
-		record_tasks_randomObs(start=start_config,end=goal_config,
-			fileId=rank,aabb_list = (aabb_list).tolist())
+		# record_tasks_randomObs(start=start_config,end=goal_config,
+			# fileId=rank,aabb_list = (aabb_list).tolist())
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ def run():
 
     # load a scene from ProjectRoom environment XML file
     env = Environment()
-    # env.SetViewer('qtcoin')
+    env.SetViewer('qtcoin')
     shelf_obb = ShelfObb()
     frame_shapes,frame_positions =shelf_obb.generate_frames()
     board_shapes,board_positions = shelf_obb.generate_borad_obb()
@@ -48,7 +48,7 @@ def run():
     if(start_config is None):
         print("initialize robot arm eith failure")
         exit()
-    execute_activeDOFValues(solution=start_config,robot=robot,env=env)
+    # execute_activeDOFValues(solution=start_config,robot=robot,env=env)
     time.sleep(0.1)
     
 
@@ -58,6 +58,7 @@ def run():
     inside = True
     delta_time = 0.0
     for i in range(goal_num):
+        raw_input("...")
         if(success_num>=3000):
             break
         #genrate scene
@@ -81,12 +82,9 @@ def run():
         execute_activeDOFValues(solution=goal_config,robot=robot,env=env)      
         time.sleep(0.1)
 
-        write_data_withObs(init_state=start_config,goal_state=goal_config,aabb_list=list(aabb_list))
+        # write_data_withObs(init_state=start_config,goal_state=goal_config,aabb_list=list(aabb_list))
         success_num +=1
         print success_num
-        # record_trajectory_randomObs(start=start_config,end=goal_config,
-            # traj=interpolated_traj,fileId=rank,aabb_list = (aabb_list).tolist())
-        # Execute the trajectory.
 
 def run1():
     print"test"
