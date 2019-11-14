@@ -59,7 +59,7 @@ def run():
     #get task from dataset
     init_states = None
     goal_states = None
-    obs_list,init_array,goal_array = read_task_withObs("dataset/tasks_stacking.txt")
+    obs_list,init_array,goal_array = read_task_withObs("dataset/tasks_continuous_stacking.txt")
     init_states = np.copy(init_array)
     goal_states = np.copy(goal_array)
 
@@ -67,10 +67,10 @@ def run():
     time_limit = args.time_limit#5.0
     motion_range = 20.0
     sample_per_batch = 100.0
-    planner_name = "OMPL_RRTstar"
+    planner_name = "OMPL_BITstar"
     orplanner = ORPLANNER(robot=robot,env=env,planner_name = planner_name,
         time_limit = time_limit, motion_range = motion_range,samples_per_batch=sample_per_batch)
-    goal_num = int(1000/mpi_size)
+    goal_num = 400
     success_num = 0
     inside = True
     delta_time = 0.0
@@ -83,7 +83,7 @@ def run():
         print("sucess num:",success_num)
         print("total plan time:",delta_time)
 
-        state_id = i + rank*goal_num
+        state_id = i #+ rank*goal_num
         #load scene
         obs_aabbs = list(obs_list[state_id])
         shapes,positions = transform_obb(obs_aabbs[0:-1])
@@ -121,20 +121,20 @@ def run():
                 path_array=np.array(interpolated_traj))
 
         #grab object
-        taskmanip.CloseFingers()
-        time.sleep(2)
-        robot.Grab(body_list[0])
+        # taskmanip.CloseFingers()
+        # time.sleep(2)
+        # robot.Grab(body_list[0])
         # Execute the trajectory.
         robot.GetController().SetPath(traj)
         robot.WaitForController(0)
         time.sleep(0.5)
         #release grab
-        taskmanip.ReleaseFingers(target=body_list[0])
-        time.sleep(1)
+        # taskmanip.ReleaseFingers(target=body_list[0])
+        # time.sleep(1)
 
         success_num+=1
         delta_time += (end_time-start_time)
-    save_result(res_notebook,"result_data_stacking/%s_shelf_%drank_%ds.pkl"%(planner_name,rank,int(time_limit)))
+    save_result(res_notebook,"result_data_stacking_continuous/%s_shelf_%drank_%ds.pkl"%(planner_name,rank,int(time_limit)))
 
 
 
